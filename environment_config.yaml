@@ -1,0 +1,47 @@
+attributes:
+  metadata:
+    restrictions:
+      - "cluster:net_provider != 'neutron'": "Only neutron is supported by OpenDaylight"
+  use_vxlan:
+    type: "checkbox"
+    weight: 20
+    value: false
+    label: "Use vxlan"
+    description: "Configure neutron to use VXLAN tunneling"
+    restrictions:
+      - condition: "networking_parameters:segmentation_type == 'vlan'"
+        message: "Neutron with GRE segmentation required"
+        action: "disable"
+  vni_range_start:
+    value: '10'
+    label: 'VNI range start'
+    description: 'VXLAN VNI IDs range start'
+    type: 'text'
+    weight: 30
+    restrictions:
+      - condition: "networking_parameters:segmentation_type == 'vlan'"
+        action: "hide"
+    regex:
+      source: '^\d+$'
+      error: 'Invalid ID number'
+  vni_range_end:
+    value: '10000'
+    label: 'VNI range end'
+    description: 'VXLAN VNI IDs range end'
+    type: 'text'
+    weight: 31
+    restrictions:
+      - condition: "networking_parameters:segmentation_type == 'vlan'"
+        action: "hide"
+    regex:
+      source: '^\d+$'
+      error: 'Invalid ID number'
+  rest_api_port:
+    value: '8282'
+    label: 'Port number'
+    description: 'Port on which ODL REST API will be available.'
+    weight: 40
+    type: "text"
+    regex:
+      source: ^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$
+      error: 'Invalid port number'

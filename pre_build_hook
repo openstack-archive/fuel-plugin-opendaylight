@@ -1,0 +1,82 @@
+#!/bin/bash
+
+# Add here any the actions which are required before plugin build
+# like packages building, packages downloading from mirrors and so on.
+# The script should return 0 if there were no errors.
+set -eux
+
+# Where we can find odl karaf distribution tarball
+# can be http(s) url or absolute path
+ODL_TARBALL_LOCATION="https://nexus.opendaylight.org/content/groups/public/org/opendaylight/integration/distribution-karaf/0.2.3-Helium-SR3/distribution-karaf-0.2.3-Helium-SR3.tar.gz"
+TMP_NAME="karaf-odl.tar.gz"
+
+# URL of fuel library
+FUEL_LIBRARY_COMMIT="c9a86ac0e6da95d36e328ce5130715792a2eb177"
+FUEL_LIBRARY_TARBALL_URL="https://github.com/stackforge/fuel-library/archive/${FUEL_LIBRARY_COMMIT}.tar.gz"
+
+# For which systems odl package should be build
+BUILD_FOR="centos ubuntu"
+
+DIR="$(dirname `readlink -f $0`)"
+MODULES="${DIR}/deployment_scripts/puppet/modules"
+
+function cleanup {
+  rm -f "${DIR}/${TMP_NAME}"
+  rm -rf "${DIR}/package"
+}
+
+function download {
+  wget "$1" -qO $2
+}
+
+function unpack {
+  tar xzf $1 --strip-components=1 -C "${DIR}/package"
+}
+
+function patch_odl {
+  sed -i 's/#\ ovsdb.of.version=1.3/ovsdb.of.version=1.3/' "${DIR}/package/etc/custom.properties"
+  sed -i 's/featuresBoot=.*/featuresBoot=config,standard,region,package,kar,ssh,management,odl-base-all,odl-aaa-authn,odl-restconf,odl-nsf-all,odl-adsal-northbound,odl-mdsal-apidocs,odl-ovsdb-openstack,odl-ovsdb-northbound,odl-dlux-core/' "${DIR}/package/etc/org.apache.karaf.features.cfg"
+}
+
+function build_pkg {
+  case $1 in
+    centos)
+      pushd "${DIR}/repositories/${1}/"
+      fpm --force -s dir -t rpm --prefix /opt/opendaylight --rpm-init "${DIR}/odl_package/${1}/opendaylight" --after-install "${DIR}/odl_package/${1}/opendaylight-post" --name opendaylight -d "java-1.7.0-openjdk" -C "${DIR}/package"
+      popd
+      ;;
+    ubuntu)
+      pushd "${DIR}/repositories/${1}/"
+      fpm --force -s dir -t deb --prefix /opt/opendaylight --deb-upstart "${DIR}/odl_package/${1}/opendaylight" --after-install "${DIR}/odl_package/${1}/opendaylight-post" --name opendaylight -d "openjdk-7-jre-headless" -C "${DIR}/package"
+      popd
+      ;;
+    *) echo "Not supported system"; exit 1;;
+  esac
+}
+
+command -v fpm >/dev/null 2>&1 || { echo >&2 "fpm ruby gem required but it's not installed.  Aborting."; exit 1; }
+
+cleanup
+
+mkdir -p "${DIR}/package"
+
+if [[ "$ODL_TARBALL_LOCATION" =~ ^http.* ]]
+then
+  download $ODL_TARBALL_LOCATION ${DIR}/${TMP_NAME}
+  unpack ${DIR}/${TMP_NAME}
+else
+  unpack $ODL_TARBALL_LOCATION
+fi
+
+patch_odl
+
+for system in $BUILD_FOR
+do
+  build_pkg $system
+done
+
+wget -qO- "${FUEL_LIBRARY_TARBALL_URL}" | \
+      tar -C "${MODULES}" --strip-components=3 -zxvf - \
+      fuel-library-${FUEL_LIBRARY_COMMIT}/deployment/puppet/{inifile,firewall,corosync,pacemaker}
+
+cleanup
