@@ -1,7 +1,8 @@
 OpenDaylight plugin
 ===================
 
-This plugin will install OpenDaylight controller and set it as manager for ovs.
+This is a proof of concept of the plugin which will install OpenDaylight controller 
+and set it as manager for ovs.
 
 
 Building the plugin
