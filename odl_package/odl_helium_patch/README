@@ -1,0 +1,5 @@
+This directory contains compiled code which is a part of
+ovsdb opendaylight project which source code can be found 
+here https://github.com/opendaylight/ovsdb/tree/release/helium-sr3
+
+Changes against orginal code are described inside fuel.patch file.

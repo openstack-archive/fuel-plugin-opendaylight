@@ -1,0 +1,43 @@
+From ab131a2ebcd1e198269df8f8c4f8984b9a275131 Mon Sep 17 00:00:00 2001
+From: Michal Skalski <mskalski@mirantis.com>
+Date: Wed, 24 Jun 2015 13:43:01 +0200
+Subject: [PATCH] Change names of external bridge and external patch port names
+ to support fuel network
+
+---
+ .../java/org/opendaylight/ovsdb/openstack/netvirt/api/Constants.java   | 3 ++-
+ .../ovsdb/openstack/netvirt/impl/ConfigurationServiceImpl.java         | 2 ++
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/Constants.java b/openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/Constants.java
+index acf7a9b..cd39527 100644
+--- a/openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/Constants.java
++++ b/openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/Constants.java
+@@ -29,9 +29,10 @@ public final class Constants {
+     public static final String TUNNEL_ENDPOINT_KEY = "local_ip";
+     public static final String INTEGRATION_BRIDGE = "br-int";
+     public static final String NETWORK_BRIDGE = "br-net";
+-    public static final String EXTERNAL_BRIDGE = "br-ex";
++    public static final String EXTERNAL_BRIDGE = "br-floating";
+     public static final String PATCH_PORT_TO_INTEGRATION_BRIDGE_NAME = "patch-int";
+     public static final String PATCH_PORT_TO_NETWORK_BRIDGE_NAME = "patch-net";
++    public static final String PATCH_PORT_TO_EXTERNAL_BRIDGE_NAME = "p_br-floating-0";
+     public static final String PROVIDER_MAPPINGS_KEY = "provider_mappings";
+     public static final String PROVIDER_MAPPING = "physnet1:eth1";
+ 
+diff --git a/openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/ConfigurationServiceImpl.java b/openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/ConfigurationServiceImpl.java
+index 3550292..9eb9448 100644
+--- a/openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/ConfigurationServiceImpl.java
++++ b/openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/ConfigurationServiceImpl.java
+@@ -51,6 +51,8 @@ public class ConfigurationServiceImpl implements org.opendaylight.ovsdb.openstac
+                            Constants.PATCH_PORT_TO_NETWORK_BRIDGE_NAME);
+         patchPortNames.put(new ImmutablePair<>(networkBridgeName, integrationBridgeName),
+                            Constants.PATCH_PORT_TO_INTEGRATION_BRIDGE_NAME);
++        patchPortNames.put(new ImmutablePair<>(externalBridgeName, integrationBridgeName),
++                           Constants.PATCH_PORT_TO_EXTERNAL_BRIDGE_NAME);
+         providerMappingsKey = Constants.PROVIDER_MAPPINGS_KEY;
+         providerMapping = Constants.PROVIDER_MAPPING;
+     }
+-- 
+2.1.4
+
