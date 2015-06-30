@@ -76,4 +76,4 @@
   parameters:
     puppet_manifest: puppet/manifests/start-neutron.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
-    timeout: 180
+    timeout: 210

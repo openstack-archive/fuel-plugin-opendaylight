@@ -2,5 +2,6 @@ include opendaylight
 include firewall
 
 class { 'opendaylight::service':
-    port => $opendaylight::rest_api_port,
+    tomcat_port  => $opendaylight::rest_api_port,
+    bind_address => $opendaylight::node_internal_address
 }

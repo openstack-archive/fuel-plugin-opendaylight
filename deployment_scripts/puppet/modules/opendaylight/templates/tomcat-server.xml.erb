@@ -37,7 +37,8 @@
   </GlobalNamingResources>
 
   <Service name="Catalina">
-    <Connector port="<%= @port %>" protocol="HTTP/1.1"
+    <Connector port="<%= @tomcat_port %>" protocol="HTTP/1.1"
+               address="<%= @bind_address %>"
                connectionTimeout="20000"
                redirectPort="8443" />
 

@@ -5,7 +5,7 @@ class opendaylight {
   $node = filter_nodes($nodes_hash,'name',$::hostname)
 
   $rest_api_port = $odl_settings['rest_api_port']
-  $segmentation_type = $odl_settings['segmentation_type']
-  $rest_api_address = $primary_controller_hash[0]['internal_address']
+  $manager_ip_address = $primary_controller_hash[0]['internal_address']
   $node_private_address = $node[0]['private_address']
+  $node_internal_address = $node[0]['internal_address']
 }

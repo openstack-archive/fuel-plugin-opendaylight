@@ -1,5 +1,6 @@
 class opendaylight::service (
-  $port = 8282,
+  $tomcat_port = 8282,
+  $bind_address = undef
 ) {
 
   $role = hiera('role')
@@ -15,15 +16,23 @@ class opendaylight::service (
     service { 'opendaylight' :
       ensure  => running,
       enable  => true,
-      require => File['/opt/opendaylight/configuration/tomcat-server.xml'],
+      require => File[
+                      '/opt/opendaylight/configuration/tomcat-server.xml',
+                      '/opt/opendaylight/etc/jetty.xml'],
     }
 
-    debug("Set odl rest api port to ${port}")
+    debug("Set odl rest api port to ${tomcat_port}")
 
     file { '/opt/opendaylight/configuration/tomcat-server.xml':
       ensure  => file,
       owner   => 'odl',
-      content => template('opendaylight/tomcat-server.erb')
+      content => template('opendaylight/tomcat-server.xml.erb')
+    }
+
+    file { '/opt/opendaylight/etc/jetty.xml':
+      ensure  => file,
+      owner   => 'odl',
+      content => template('opendaylight/jetty.xml.erb')
     }
 
     exec { 'wait-until-odl-ready':
@@ -33,6 +42,10 @@ class opendaylight::service (
       try_sleep => 10,
       require   => Service['opendaylight'],
     }
+  }
+
+  if ($role == 'primary-controller') or ($role == 'controller') {
+    include opendaylight::ha::haproxy
   }
 
   if $opendaylight::odl_settings['use_vxlan'] {

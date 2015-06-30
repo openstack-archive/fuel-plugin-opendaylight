@@ -20,7 +20,7 @@ exec { 'remove-ovs-db':
   path    => '/bin:/usr/sbin:/usr/bin',
 }
 exec { 'ovs-set-manager':
-  command => "ovs-vsctl set-manager tcp:${opendaylight::rest_api_address}:6640",
+  command => "ovs-vsctl set-manager tcp:${opendaylight::manager_ip_address}:6640",
   path    => '/usr/bin'
 }
 

@@ -3,9 +3,12 @@ name: opendaylight
 # Human-readable name for your plugin
 title: OpenDaylight Helium plugin
 # Plugin version
-version: '0.5.0'
+version: '0.5.1'
 # Description
-description: This plugin provides OpenDaylight as a backend for neutron. 
+description: 'This plugin provides OpenDaylight as a backend for neutron.
+Use the same IP address as for OpenStack Horizon and port 8181 to reach dlux web ui and apidoc explorer.
+  DLUX: http://horizon_ip:8181/dlux/index.html, 
+  APIDOC: http://horizon_ip:8181/apidoc/explorer/index.html'
 # Required fuel version
 fuel_version: ['6.1']
 # Specify license of your plugin
@@ -13,7 +16,7 @@ licenses: ['Apache License Version 2.0']
 # Specify author or company name
 authors: ['Michal Skalski, Mirantis']
 # A link to the plugin's page
-homepage: 'https://github.com/stackforge/fuel-plugins'
+homepage: 'https://github.com/stackforge/fuel-plugin-opendaylight'
 # Specify a group which your plugin implements, possible options:
 # network, storage, storage::cinder, storage::glance, hypervisor
 groups: ['network']

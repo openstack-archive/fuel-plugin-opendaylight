@@ -1,6 +1,6 @@
 include opendaylight
 
-$address = $opendaylight::rest_api_address
+$address = hiera('management_vip')
 $port = $opendaylight::rest_api_port
 $vni_start = $opendaylight::odl_settings['vni_range_start']
 $vni_end = $opendaylight::odl_settings['vni_range_end']

@@ -32,16 +32,22 @@ service { 'neutron-server':
 
 if $primary_controller {
   exec {'refresh-dhcp-agent':
-    command => 'crm resource restart p_neutron-dhcp-agent',
-    path    => '/usr/bin:/usr/sbin',
+    command   => 'crm resource restart p_neutron-dhcp-agent',
+    path      => '/usr/bin:/usr/sbin',
+    tries     => 3,
+    try_sleep => 10,
   } ->
   exec {'refresh-metadata-agent':
-    command => 'crm resource restart p_neutron-metadata-agent',
-    path    => '/usr/bin:/usr/sbin',
+    command   => 'crm resource restart p_neutron-metadata-agent',
+    path      => '/usr/bin:/usr/sbin',
+    tries     => 3,
+    try_sleep => 10,
   } ->
   exec {'refresh-l3-agent':
-    command => 'crm resource restart p_neutron-l3-agent',
-    path    => '/usr/bin:/usr/sbin',
+    command   => 'crm resource restart p_neutron-l3-agent',
+    path      => '/usr/bin:/usr/sbin',
+    tries     => 3,
+    try_sleep => 10,
   } ->
   openstack::network::create_network{'net04':
     netdata => $vm_net,
