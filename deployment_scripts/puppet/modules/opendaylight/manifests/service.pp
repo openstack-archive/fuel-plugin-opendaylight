@@ -3,9 +3,10 @@ class opendaylight::service (
   $bind_address = undef
 ) {
 
-  $role = hiera('role')
+  $nodes_hash = hiera('nodes', {})
+  $roles = node_roles($nodes_hash, hiera('uid'))
 
-  if $role == 'primary-controller' {
+  if member($roles, 'primary-controller') {
     firewall {'215 odl':
       port   => [ $opendaylight::rest_api_port, 6633, 6640, 6653, 8181, 8101],
       proto  => 'tcp',
@@ -44,7 +45,7 @@ class opendaylight::service (
     }
   }
 
-  if ($role == 'primary-controller') or ($role == 'controller') {
+  if member($roles, 'controller') or member($roles, 'primary-controller') {
     include opendaylight::ha::haproxy
   }
 
