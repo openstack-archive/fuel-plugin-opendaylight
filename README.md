@@ -69,7 +69,7 @@ OpenDaylight plugin installation
 
         id | name         | version | package_version
         ---|--------------|---------|----------------
-        1  | opendaylight | 0.5.1   | 2.0.0
+        1  | opendaylight | 0.5.2   | 2.0.0
 
 9. Plugin is ready to use and can be enabled on the Settings tab of the Fuel web UI.
 
@@ -114,7 +114,7 @@ None.
 Release Notes
 -------------
 
-**0.5.1**
+**0.5.2**
 
 * Initial release of the plugin. This is a beta version.
 
