@@ -28,8 +28,8 @@ Limitations
 -----------
 
 * Supports only environments with Neutron
-* HA not implemented in Helium release - one instance of ODL controller runs on primary OpenStack controller.
-* L3 traffic managed by neutron agent - L3 is not fully implemented in Helium release, lack of drivers in OpenStack Juno.
+* HA for ovsdb feature is not implemented in Lithium release - one instance of ODL controller runs on primary OpenStack controller.
+* L3 traffic managed by neutron agent - lack of drivers in OpenStack Juno.
 
 Installation Guide
 ==================
@@ -99,7 +99,7 @@ Testing
 
 Use the same IP address as for OpenStack Horizon panel and port 8181 to reach dlux web ui and apidoc explorer:
 
-* DLUX: http://horizon_ip:8181/dlux/index.html
+* DLUX: http://horizon_ip:8181/index.html
 * APIDOC: http://horizon_ip:8181/apidoc/explorer/index.html
 
 OpenDaylight files are stored on primary controller inside */opt/opendaylight* directory.
@@ -117,6 +117,10 @@ Release Notes
 **0.5.2**
 
 * Initial release of the plugin. This is a beta version.
+
+**0.6.0**
+
+* Integrate Lithium release with OpenStack Juno.
 
 Development
 ===========
