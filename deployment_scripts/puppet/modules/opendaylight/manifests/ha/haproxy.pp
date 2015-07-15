@@ -31,6 +31,32 @@ class opendaylight::ha::haproxy {
     internal_virtual_ip => $management_vip,
   }
 
+  opendaylight::ha::haproxy_service { 'odl-openflow':
+    order                  => '218',
+    listen_port            => '6653',
+    balancermember_port    => '6653',
+
+    haproxy_config_options => {
+      'balance' => 'source',
+      'mode'    => 'tcp'
+    },
+
+    balancermember_options => 'check inter 5000 rise 2 fall 3',
+  }
+
+  opendaylight::ha::haproxy_service { 'odl-ovsdb-manager':
+    order                  => '217',
+    listen_port            => '6640',
+    balancermember_port    => '6640',
+
+    haproxy_config_options => {
+      'balance' => 'source',
+      'mode'    => 'tcp'
+    },
+
+    balancermember_options => 'check inter 5000 rise 2 fall 3',
+  }
+
   opendaylight::ha::haproxy_service { 'odl-jetty':
     public                 => true,
     order                  => '216',

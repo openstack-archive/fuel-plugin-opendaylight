@@ -1,5 +1,6 @@
 include opendaylight
 
+$management_vip = hiera('management_vip')
 $ovs_service_name = $operatingsystem ? {
   'CentOS' => 'openvswitch',
   'Ubuntu' => 'openvswitch-switch',
@@ -20,7 +21,7 @@ exec { 'remove-ovs-db':
   path    => '/bin:/usr/sbin:/usr/bin',
 }
 exec { 'ovs-set-manager':
-  command => "ovs-vsctl set-manager tcp:${opendaylight::manager_ip_address}:6640",
+  command => "ovs-vsctl set-manager tcp:${management_vip}:6640",
   path    => '/usr/bin'
 }
 

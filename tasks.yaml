@@ -1,11 +1,11 @@
-- id: odl_install
-  role: ['primary-controller']
-  stage: pre_deployment/4450
-  type: puppet
-  parameters:
-    puppet_manifest: puppet/manifests/controller-pre.pp
-    puppet_modules: puppet/modules:/etc/puppet/modules
-    timeout: 720
+#- id: odl_install
+#  role: ['primary-controller', 'controller']
+#  stage: pre_deployment/4450
+#  type: puppet
+#  parameters:
+#    puppet_manifest: puppet/manifests/controller-pre.pp
+#    puppet_modules: puppet/modules:/etc/puppet/modules
+#    timeout: 720
 - id: odl_configure
   role: ['primary-controller', 'controller', 'compute']
   stage: post_deployment/4455

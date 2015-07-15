@@ -2,6 +2,12 @@ attributes:
   metadata:
     restrictions:
       - "cluster:net_provider != 'neutron'": "Only neutron is supported by OpenDaylight"
+  cluster:
+    type: "checkbox"
+    weight: 15
+    value: false
+    label: "Create cluster"
+    description: "ODL SDN controller will be installed on all OpenStack controllers with odl-mdsal-clustering feature enabled. You should have at least 3 nodes with controller role assigned."
   use_vxlan:
     type: "checkbox"
     weight: 20
