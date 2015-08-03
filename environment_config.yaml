@@ -17,40 +17,11 @@ attributes:
         - odl-dlux-all
         - odl-mdsal-apidocs
         - odl-ovsdb-openstack
-  use_vxlan:
+  enable_l3_odl:
+    weight: 12
     type: "checkbox"
-    weight: 20
     value: false
-    label: "Use vxlan"
-    description: "Configure neutron to use VXLAN tunneling"
-    restrictions:
-      - condition: "networking_parameters:segmentation_type == 'vlan'"
-        message: "Neutron with GRE segmentation required"
-        action: "disable"
-  vni_range_start:
-    value: '10'
-    label: 'VNI range start'
-    description: 'VXLAN VNI IDs range start'
-    type: 'text'
-    weight: 30
-    restrictions:
-      - condition: "networking_parameters:segmentation_type == 'vlan'"
-        action: "hide"
-    regex:
-      source: '^\d+$'
-      error: 'Invalid ID number'
-  vni_range_end:
-    value: '10000'
-    label: 'VNI range end'
-    description: 'VXLAN VNI IDs range end'
-    type: 'text'
-    weight: 31
-    restrictions:
-      - condition: "networking_parameters:segmentation_type == 'vlan'"
-        action: "hide"
-    regex:
-      source: '^\d+$'
-      error: 'Invalid ID number'
+    label: "EXPERIMENTAL: Use ODL to manage L3 traffic"
   rest_api_port:
     value: '8282'
     label: 'Port number'
