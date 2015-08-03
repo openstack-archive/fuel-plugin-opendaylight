@@ -15,45 +15,38 @@
 #
 class opendaylight::ha::haproxy {
 
-  Haproxy::Service        { use_include => true }
-  Haproxy::Balancermember { use_include => true }
-
   $public_vip = hiera('public_vip')
   $management_vip = hiera('management_vip')
   $nodes_hash = hiera('nodes')
   $primary_controller_nodes = filter_nodes($nodes_hash,'role','primary-controller')
-  $controllers = concat($primary_controller_nodes, filter_nodes($nodes_hash,'role','controller'))
+  $odl_controllers = filter_nodes($nodes_hash,'role','opendaylight')
 
-  Opendaylight::Ha::Haproxy_service {
-    server_names        => filter_hash($controllers, 'name'),
-    ipaddresses         => filter_hash($controllers, 'internal_address'),
-    public_virtual_ip   => $public_vip,
-    internal_virtual_ip => $management_vip,
+  # defaults for any haproxy_service within this class
+  Openstack::Ha::Haproxy_service {
+      internal_virtual_ip => $management_vip,
+      ipaddresses         => filter_hash($odl_controllers, 'internal_address'),
+      public_virtual_ip   => $public_vip,
+      server_names        => filter_hash($odl_controllers, 'name'),
+      public              => true,
+      internal            => true,
   }
 
-  opendaylight::ha::haproxy_service { 'odl-jetty':
-    public                 => true,
+  openstack::ha::haproxy_service { 'odl-jetty':
     order                  => '216',
     listen_port            => '8181',
-    balancermember_port    => '8181',
-
     haproxy_config_options => {
-      'option'         => ['httpchk /dlux/index.html', 'httplog'],
+      'option'         => ['httpchk /index.html', 'httplog'],
       'timeout client' => '3h',
       'timeout server' => '3h',
       'balance'        => 'source',
       'mode'           => 'http'
     },
-
-    balancermember_options => 'check inter 5000 rise 2 fall 3',
+    balancermember_options => 'check inter 2000 fall 3',
   }
 
-  opendaylight::ha::haproxy_service { 'odl-tomcat':
-    public                 => true,
+  openstack::ha::haproxy_service { 'odl-tomcat':
     order                  => '215',
     listen_port            => $opendaylight::rest_api_port,
-    balancermember_port    => $opendaylight::rest_api_port,
-
     haproxy_config_options => {
       'option'         => ['httpchk /apidoc/explorer', 'httplog'],
       'timeout client' => '3h',
@@ -61,21 +54,6 @@ class opendaylight::ha::haproxy {
       'balance'        => 'source',
       'mode'           => 'http'
     },
-
     balancermember_options => 'check inter 5000 rise 2 fall 3',
   }
-
-  exec { 'haproxy reload':
-    command   => 'export OCF_ROOT="/usr/lib/ocf"; (ip netns list | grep haproxy) && ip netns exec haproxy /usr/lib/ocf/resource.d/fuel/ns_haproxy reload',
-    path      => '/usr/bin:/usr/sbin:/bin:/sbin',
-    logoutput => true,
-    provider  => 'shell',
-    tries     => 10,
-    try_sleep => 10,
-    returns   => [0, ''],
-  }
-
-  Haproxy::Listen <||> -> Exec['haproxy reload']
-  Haproxy::Balancermember <||> -> Exec['haproxy reload']
-
 }

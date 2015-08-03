@@ -1,16 +1,17 @@
 class opendaylight::service (
   $rest_port = 8282,
-  $bind_address = undef
+  $bind_address = undef,
 ) {
 
   $nodes_hash = hiera('nodes', {})
   $roles = node_roles($nodes_hash, hiera('uid'))
   $management_vip = hiera('management_vip')
-  $odl = hiera("opendaylight")
+  $odl = hiera('opendaylight')
   $features = $odl['metadata']['odl_features']
   $enable = {}
+  $enable_l3_odl = $odl['enable_l3_odl']
 
-  if member($roles, 'primary-controller') {
+  if member($roles, 'opendaylight') {
 
     firewall {'215 odl':
       port   => [ $opendaylight::rest_api_port, 6633, 6640, 6653, 8181, 8101],
@@ -62,13 +63,5 @@ class opendaylight::service (
 
   if member($roles, 'controller') or member($roles, 'primary-controller') {
     include opendaylight::ha::haproxy
-  }
-
-  if $opendaylight::odl_settings['use_vxlan'] {
-    firewall {'216 vxlan':
-      port   => [4789],
-      proto  => 'udp',
-      action => 'accept',
-    }
   }
 }
