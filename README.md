@@ -17,7 +17,7 @@ Requirements
 
 | Requirement                      | Version/Comment |
 |----------------------------------|-----------------|
-| Mirantis OpenStack compatibility | 6.1             |
+| Mirantis OpenStack compatibility | 7.0             |
 
 Recommendations
 ---------------
@@ -27,9 +27,9 @@ None.
 Limitations
 -----------
 
-* Supports only environments with Neutron
-* HA for ovsdb feature is not implemented in Lithium release - one instance of ODL controller runs on primary OpenStack controller.
-* L3 traffic managed by neutron agent - lack of drivers in OpenStack Juno.
+* Supports only environments with Neutron.
+* HA for ovsdb feature is not implemented yet.
+* L3 traffic managed by neutron agent.
 
 Installation Guide
 ==================
@@ -82,11 +82,10 @@ OpenDaylight plugin configuration
 
 1. Create a new environment with the Fuel UI wizard.
 2. Click on the Settings tab of the Fuel web UI.
-3. Scroll down the page, select the "OpenDaylight plugin" checkbox.
-   Rest of configuration is optional
+3. Select "OpenDaylight Lithium plugin" section.
+4. Tick the checkbox and click "Save Settings" button.
+5. Assign role OPENDAYLIGHT to one of the node.
 
-
-![OpenDaylight options](./figures/opendaylight-options.png "OpenDaylight options")
 
 Build options
 -------------
@@ -122,25 +121,6 @@ Known issues
 
 * VM live migration not supported by ODL ovsdb
 * ODL ignore MTU size from Neutron and create tap devices for VMs with MTU 1500. Things like Jumbo frames will not work on VMs side.
-
-Release Notes
--------------
-
-**0.5.2**
-
-* Initial release of the plugin. This is a beta version.
-
-**0.6.0**
-
-* Integrate Lithium release with OpenStack Juno.
-
-**0.6.1**
-
-* Integrate Lithium SR1 with OpenStack Juno.
-
-**0.6.2**
-
-* Fix MTU for vxlan segmentation type.
 
 Development
 ===========

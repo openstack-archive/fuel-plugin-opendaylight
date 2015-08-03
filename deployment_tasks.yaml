@@ -1,14 +1,28 @@
+- id: opendaylight
+  type: group
+  role: [opendaylight]
+  requires: [deploy_start]
+  required_for: [deploy_end, primary-controller, controller]
+  tasks: [fuel_pkgs, hiera, globals, tools, logging, netconfig,
+        hosts, firewall, deploy_start, odl_install]
+  parameters:
+    strategy:
+      type: parallel
 - id: odl_install
-  role: ['primary-controller']
-  stage: pre_deployment/4450
   type: puppet
+  groups: [opendaylight]
+  requires: [deploy_start]
+  required_for: [deploy_end]
+  requires: [hosts, firewall, globals]
+  required_for: [deploy_end, openstack-network]
   parameters:
     puppet_manifest: puppet/manifests/controller-pre.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
     timeout: 720
 - id: odl_configure
-  role: ['primary-controller', 'controller', 'compute']
-  stage: post_deployment/4455
+  role: ['primary-controller', 'controller', 'compute', 'opendaylight']
+  requires: [post_deployment_start]
+  required_for: [post_deployment_end]
   type: puppet
   parameters:
     puppet_manifest: puppet/manifests/odl-service.pp
@@ -16,14 +30,16 @@
     timeout: 1400
 - id: odl_delete_predefined_net
   role: ['primary-controller']
-  stage: post_deployment/4460
+  requires: [odl_configure]
+  required_for: [post_deployment_end]
   type: shell
   parameters:
     cmd: ./clean-neutron.sh
     timeout: 120
 - id: odl_disable_ovs_agent
   role: ['primary-controller', 'compute']
-  stage: post_deployment/4465
+  requires: [odl_delete_predefined_net]
+  required_for: [post_deployment_end]
   type: puppet
   parameters:
     puppet_manifest: puppet/manifests/disable-ovs-agent.pp
@@ -31,7 +47,8 @@
     timeout: 120
 - id: odl_stop_neutron
   role: ['primary-controller', 'controller']
-  stage: post_deployment/4470
+  requires: [odl_disable_ovs_agent]
+  required_for: [post_deployment_end]
   type: puppet
   parameters:
     puppet_manifest: puppet/manifests/stop-neutron.pp
@@ -39,7 +56,8 @@
     timeout: 120
 - id: odl_recreate_ovs
   role: ['primary-controller', 'controller', 'compute']
-  stage: post_deployment/4475
+  requires: [odl_stop_neutron]
+  required_for: [post_deployment_end]
   type: puppet
   parameters:
     puppet_manifest: puppet/manifests/recreate-ovs.pp
@@ -47,7 +65,8 @@
     timeout: 120
 - id: odl_ml2_configuration
   role: ['primary-controller', 'controller', 'compute']
-  stage: post_deployment/4480
+  requires: [odl_recreate_ovs]
+  required_for: [post_deployment_end]
   type: puppet
   parameters:
     puppet_manifest: puppet/manifests/ml2-configuration.pp
@@ -55,15 +74,17 @@
     timeout: 120
 - id: odl_recreate_neutron_db
   role: ['primary-controller']
-  stage: post_deployment/4485
+  requires: [odl_ml2_configuration]
+  required_for: [post_deployment_end]
   type: puppet
   parameters:
     puppet_manifest: puppet/manifests/recreate-neutron-db.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
     timeout: 180
 - id: odl_setup_floating
-  role: ['primary-controller', 'controller']
-  stage: post_deployment/4490
+  role: ['primary-controller', 'controller', 'compute']
+  requires: [odl_recreate_neutron_db]
+  required_for: [post_deployment_end]
   type: puppet
   parameters:
     puppet_manifest: puppet/manifests/setup-floating.pp
@@ -71,7 +92,8 @@
     timeout: 120
 - id: odl_start_neutron
   role: ['primary-controller', 'controller']
-  stage: post_deployment/4495
+  requires: [odl_setup_floating]
+  required_for: [post_deployment_end]
   type: puppet
   parameters:
     puppet_manifest: puppet/manifests/start-neutron.pp
