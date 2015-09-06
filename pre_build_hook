@@ -11,6 +11,7 @@ ODL_TARBALL_LOCATION="https://nexus.opendaylight.org/content/groups/public/org/o
 
 #Verion number used in deb/rpm package
 ODL_VERSION_NUMBER="0.3.0"
+OVS_VERSION="2.3.2"
 ODL_DESCRIPTION="OpenDaylight SDN Controller"
 TMP_NAME="karaf-odl.tar.gz"
 
@@ -52,6 +53,14 @@ function build_pkg {
       pushd "${DIR}/repositories/${1}/"
       fpm --force -s dir -t deb --version "${ODL_VERSION_NUMBER}" --description "${ODL_DESCRIPTION}" --prefix /opt/opendaylight --deb-upstart "${DIR}/odl_package/${1}/opendaylight" --after-install "${DIR}/odl_package/${1}/opendaylight-post" --name opendaylight -d "openjdk-7-jre-headless" -C "${DIR}/package"
       popd
+      sudo apt-get install build-essential fakeroot debhelper libssl-dev -y
+      wget http://openvswitch.org/releases/openvswitch-${OVS_VERSION}.tar.gz
+      tar -xzf openvswitch-${OVS_VERSION}.tar.gz
+      cd openvswitch-${OVS_VERSION}
+      DEB_BUILD_OPTIONS='parallel=8 nocheck' fakeroot debian/rules binary
+      cd ..
+      sudo dpkg -i openvswitch-common_${OVS_VERSION}-1_amd64.deb openvswitch-switch_${OVS_VERSION}-1_amd64.deb openvswitch-pki_${OVS_VERSION}-1_all.deb
+      mv openvswitch*.deb ${DIR}/repositories/ubuntu/
       ;;
     *) echo "Not supported system"; exit 1;;
   esac

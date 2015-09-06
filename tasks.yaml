@@ -6,6 +6,14 @@
     puppet_manifest: puppet/manifests/controller-pre.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
     timeout: 720
+- id: ovs_install
+  role: '*'
+  stage: pre_deployment/4451
+  type: puppet
+  parameters:
+    puppet_manifest: puppet/manifests/ovs-install.pp
+    puppet_modules: puppet/modules:/etc/puppet/modules
+    timeout: 720
 - id: odl_configure
   role: ['primary-controller', 'controller', 'compute']
   stage: post_deployment/4455
