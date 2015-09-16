@@ -132,13 +132,13 @@ Development
 
 The *OpenStack Development Mailing List* is the preferred way to communicate,
 emails should be sent to `openstack-dev@lists.openstack.org` with the subject
-prefixed by `[fuel][plugins][lma]`.
+prefixed by `[fuel][plugins][odl]`.
 
 Reporting Bugs
 --------------
 
 Bugs should be filled on the [Launchpad fuel-plugins project](
-https://bugs.launchpad.net/fuel-plugins) (not GitHub) with the tag `lma`.
+https://bugs.launchpad.net/fuel-plugins) (not GitHub) with the tag `odl`.
 
 
 Contributing
