@@ -10,7 +10,7 @@ setuid odl
 
 env KARAF_HOME="/opt/opendaylight"
 env JAVA_HOME="/usr/lib/jvm/java-7-openjdk-amd64"
-env JAVA_OPTS="-server -Xms128M -Xmx4096M -XX:+UnlockDiagnosticVMOptions -XX:+UnsyncloadClass -XX:MaxPermSize=512M -Dcom.sun.management.jmxremote"
+env JAVA_OPTS="-server -Xms256M -Xmx2048M -XX:+UnlockDiagnosticVMOptions -XX:+UnsyncloadClass -XX:MaxPermSize=512M -Dcom.sun.management.jmxremote"
 env OPTS="-Dkaraf.startLocalConsole=false -Dkaraf.startRemoteShell=true"
 env MAIN="org.apache.karaf.main.Main"
 

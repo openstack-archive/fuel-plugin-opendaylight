@@ -1,17 +1,17 @@
-From 3c00c2ebd660616c2ca38ba5bc2f5d3d7c026452 Mon Sep 17 00:00:00 2001
+From 26cce1d21550c621a4ccd6bcfd31688a9b1c1a6e Mon Sep 17 00:00:00 2001
 From: Michal Skalski <mskalski@mirantis.com>
-Date: Thu, 16 Jul 2015 15:15:53 +0200
-Subject: [PATCH] Change names of external bridge and external patch port names
+Date: Wed, 16 Sep 2015 10:01:02 +0200
+Subject: [PATCH] Fuel patch
 
 ---
- .../java/org/opendaylight/ovsdb/openstack/netvirt/api/Constants.java  | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ .../java/org/opendaylight/ovsdb/openstack/netvirt/api/Constants.java    | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/Constants.java b/openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/Constants.java
-index 36ce971..f8ee636 100644
+index 05a9a07..3669ef0 100644
 --- a/openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/Constants.java
 +++ b/openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/Constants.java
-@@ -28,10 +28,10 @@ public final class Constants {
+@@ -28,7 +28,7 @@ public final class Constants {
      public static final String TUNNEL_ENDPOINT_KEY = "local_ip";
      public static final String INTEGRATION_BRIDGE = "br-int";
      public static final String NETWORK_BRIDGE = "br-net";
@@ -19,11 +19,6 @@ index 36ce971..f8ee636 100644
 +    public static final String EXTERNAL_BRIDGE = "br-floating";
      public static final String PATCH_PORT_TO_INTEGRATION_BRIDGE_NAME = "patch-int";
      public static final String PATCH_PORT_TO_NETWORK_BRIDGE_NAME = "patch-net";
--    public static final String PATCH_PORT_TO_EXTERNAL_BRIDGE_NAME = "patch-ext";
-+    public static final String PATCH_PORT_TO_EXTERNAL_BRIDGE_NAME = "p_br-floating-0";
-     public static final String PROVIDER_MAPPINGS_KEY = "provider_mappings";
-     public static final String PROVIDER_MAPPING = "physnet1:eth1";
- 
--- 
+     public static final String PATCH_PORT_TO_EXTERNAL_BRIDGE_NAME = "patch-ext";
+--
 2.1.4
-

@@ -16,7 +16,7 @@ exec { 'remove-ovs-logs':
   path    => '/bin:/usr/sbin:/usr/bin',
 }
 exec { 'remove-ovs-db':
-  command => 'rm -f /etc/openvswitch/*',
+  command => 'rm -f /etc/openvswitch/*; rm -f /etc/openvswitch/.conf.db.~lock~',
   path    => '/bin:/usr/sbin:/usr/bin',
 }
 exec { 'ovs-set-manager':

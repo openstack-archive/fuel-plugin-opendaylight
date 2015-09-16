@@ -30,6 +30,7 @@ Limitations
 * Supports only environments with Neutron
 * HA for ovsdb feature is not implemented in Lithium release - one instance of ODL controller runs on primary OpenStack controller.
 * L3 traffic managed by neutron agent - lack of drivers in OpenStack Juno.
+* VM live migration not supported by ovsdb
 
 Installation Guide
 ==================
@@ -121,6 +122,10 @@ Release Notes
 **0.6.0**
 
 * Integrate Lithium release with OpenStack Juno.
+
+**0.6.1**
+
+* Integrate Lithium SR1 with OpenStack Juno.
 
 Development
 ===========

@@ -13,7 +13,7 @@
   parameters:
     puppet_manifest: puppet/manifests/odl-service.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
-    timeout: 720
+    timeout: 1400
 - id: odl_delete_predefined_net
   role: ['primary-controller']
   stage: post_deployment/4460

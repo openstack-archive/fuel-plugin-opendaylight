@@ -1,13 +1,14 @@
 class opendaylight::service (
-  $tomcat_port = 8282,
+  $rest_port = 8282,
   $bind_address = undef
 ) {
 
   $nodes_hash = hiera('nodes', {})
   $roles = node_roles($nodes_hash, hiera('uid'))
+  $management_vip = hiera('management_vip')
 
   $karaf_default_features = ['config', 'standard', 'region', 'package', 'kar', 'ssh', 'management']
-  $karaf_odl_features = ['odl-base-all', 'odl-restconf', 'odl-ovsdb-openstack', 'odl-dlux-all', 'odl-mdsal-apidocs']
+  $karaf_odl_features = ['odl-restconf-all', 'odl-aaa-authn', 'odl-dlux-all', 'odl-mdsal-apidocs', 'odl-ovsdb-openstack']
 
   if member($roles, 'primary-controller') {
 
@@ -24,19 +25,12 @@ class opendaylight::service (
       ensure  => running,
       enable  => true,
       require => File[
-                      '/opt/opendaylight/configuration/tomcat-server.xml',
                       '/opt/opendaylight/etc/jetty.xml',
                       '/opt/opendaylight/etc/custom.properties',
                       '/opt/opendaylight/etc/org.apache.karaf.features.cfg'],
     }
 
-    debug("Set odl rest api port to ${tomcat_port}")
-
-    file { '/opt/opendaylight/configuration/tomcat-server.xml':
-      ensure  => file,
-      owner   => 'odl',
-      content => template('opendaylight/tomcat-server.xml.erb')
-    }
+    debug("Set odl rest api port to ${rest_port}")
 
     file { '/opt/opendaylight/etc/jetty.xml':
       ensure  => file,
@@ -57,10 +51,10 @@ class opendaylight::service (
     }
 
     exec { 'wait-until-odl-ready':
-      command   => 'netstat -lpen --tcp | grep java |  grep 6653',
+      command   => "curl -o /dev/null --fail --silent --head -u admin:admin http://${management_vip}:${rest_port}/restconf/operational/network-topology:network-topology/topology/netvirt:1",
       path      => '/bin:/usr/bin',
       tries     => 60,
-      try_sleep => 10,
+      try_sleep => 20,
       require   => Service['opendaylight'],
     }
   }

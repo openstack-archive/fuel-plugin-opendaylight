@@ -7,16 +7,12 @@ set -eux
 
 # Where we can find odl karaf distribution tarball
 # can be http(s) url or absolute path
-ODL_TARBALL_LOCATION="https://nexus.opendaylight.org/content/groups/public/org/opendaylight/integration/distribution-karaf/0.3.0-Lithium/distribution-karaf-0.3.0-Lithium.tar.gz"
+ODL_TARBALL_LOCATION="https://nexus.opendaylight.org/content/groups/public/org/opendaylight/integration/distribution-karaf/0.3.1-Lithium-SR1/distribution-karaf-0.3.1-Lithium-SR1.tar.gz"
 
 #Verion number used in deb/rpm package
-ODL_VERSION_NUMBER="0.3.0"
+ODL_VERSION_NUMBER="0.3.1"
 ODL_DESCRIPTION="OpenDaylight SDN Controller"
 TMP_NAME="karaf-odl.tar.gz"
-
-# URL of fuel library
-FUEL_LIBRARY_COMMIT="c9a86ac0e6da95d36e328ce5130715792a2eb177"
-FUEL_LIBRARY_TARBALL_URL="https://github.com/stackforge/fuel-library/archive/${FUEL_LIBRARY_COMMIT}.tar.gz"
 
 # For which systems odl package should be build
 BUILD_FOR="centos ubuntu"
@@ -38,7 +34,7 @@ function unpack {
 }
 
 function patch_odl {
-  cp "${DIR}/odl_package/odl_lithium_patch/openstack.net-virt-1.1.0-Lithium.jar" "${DIR}/package/system/org/opendaylight/ovsdb/openstack.net-virt/1.1.0-Lithium/openstack.net-virt-1.1.0-Lithium.jar"
+  cp "${DIR}/odl_package/odl_lithium_patch/openstack.net-virt-1.1.1-Lithium-SR1.jar" "${DIR}/package/system/org/opendaylight/ovsdb/openstack.net-virt/1.1.1-Lithium-SR1/openstack.net-virt-1.1.1-Lithium-SR1.jar"
 }
 
 function build_pkg {
@@ -77,9 +73,5 @@ for system in $BUILD_FOR
 do
   build_pkg $system
 done
-
-wget -qO- "${FUEL_LIBRARY_TARBALL_URL}" | \
-      tar -C "${MODULES}" --strip-components=3 -zxvf - \
-      fuel-library-${FUEL_LIBRARY_COMMIT}/deployment/puppet/{inifile,firewall,corosync,pacemaker}
 
 cleanup
