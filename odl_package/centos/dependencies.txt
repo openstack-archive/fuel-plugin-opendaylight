@@ -1,0 +1,13 @@
+http://mirror.centos.org/centos/6/os/x86_64/Packages/java-1.7.0-openjdk-1.7.0.79-2.5.5.4.el6.x86_64.rpm
+http://mirror.centos.org/centos/6/os/x86_64/Packages/gdk-pixbuf2-2.24.1-5.el6.x86_64.rpm
+http://mirror.centos.org/centos/6/os/x86_64/Packages/sgml-common-0.6.3-33.el6.noarch.rpm
+http://mirror.centos.org/centos/6/os/x86_64/Packages/GConf2-2.28.0-6.el6.x86_64.rpm
+http://mirror.centos.org/centos/6/os/x86_64/Packages/ORBit2-2.14.17-5.el6.x86_64.rpm
+http://mirror.centos.org/centos/6/os/x86_64/Packages/ttmkfdir-3.0.9-32.1.el6.x86_64.rpm
+http://mirror.centos.org/centos/6/os/x86_64/Packages/libIDL-0.8.13-2.1.el6.x86_64.rpm
+http://mirror.centos.org/centos/6/os/x86_64/Packages/jpackage-utils-1.7.5-3.14.el6.noarch.rpm
+http://mirror.centos.org/centos/6/os/x86_64/Packages/tzdata-java-2015e-1.el6.noarch.rpm
+http://mirror.centos.org/centos/6/os/x86_64/Packages/xorg-x11-fonts-Type1-7.2-11.el6.noarch.rpm
+http://mirror.centos.org/centos/6/os/x86_64/Packages/giflib-4.1.6-3.1.el6.x86_64.rpm
+http://mirror.centos.org/centos/6/os/x86_64//Packages/gtk2-2.24.23-6.el6.x86_64.rpm
+http://mirror.centos.org/centos/6/os/x86_64//Packages/glib2-2.28.8-4.el6.x86_64.rpm

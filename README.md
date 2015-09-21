@@ -89,11 +89,27 @@ OpenDaylight plugin configuration
 
 ![OpenDaylight options](./figures/opendaylight-options.png "OpenDaylight options")
 
+Build options
+-------------
+
+It is possible to modify process of building plugin by setting environment variables. Look into [pre_build_hook file](pre_build_hook) for more details.
+
+Dependencies
+------------
+
 OpenDaylight controller require Java Runtime Environment. In case of CentOS system it is required to point
 repository where java rpm package can be found. It can be done in Settings tab in Repositories section.
 It is important to assign highest priority to mos repositories (lower number is a higher priority).
 
 ![OpenDaylight repositories](./figures/opendaylight-repositories.png "OpenDaylight repositories")
+
+If you plan to use plugin in environment without internet access modify build command:
+
+        INCLUDE_DEPENDENCIES=true fpb --build fuel-plugin-opendaylight/
+
+Pre build script will try download required dependencies so it become part of the compiled plugin.
+
+Note: List of packages for [ubuntu](odl_package/ubuntu/dependencies.txt) and [centos](odl_package/centos/dependencies.txt) may need to be modified if packages in centos or ubuntu repositories will change.
 
 Testing
 -------
