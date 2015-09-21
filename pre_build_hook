@@ -7,18 +7,25 @@ set -eux
 
 # Where we can find odl karaf distribution tarball
 # can be http(s) url or absolute path
-ODL_TARBALL_LOCATION="https://nexus.opendaylight.org/content/groups/public/org/opendaylight/integration/distribution-karaf/0.3.1-Lithium-SR1/distribution-karaf-0.3.1-Lithium-SR1.tar.gz"
+ODL_TARBALL_LOCATION=${ODL_TARBALL_LOCATION:-https://nexus.opendaylight.org/content/groups/public/org/opendaylight/integration/distribution-karaf/0.3.1-Lithium-SR1/distribution-karaf-0.3.1-Lithium-SR1.tar.gz}
 
 #Verion number used in deb/rpm package
-ODL_VERSION_NUMBER="0.3.1"
+ODL_VERSION_NUMBER=${ODL_VERSION_NUMBER:-0.3.1}
 ODL_DESCRIPTION="OpenDaylight SDN Controller"
 TMP_NAME="karaf-odl.tar.gz"
 
 # For which systems odl package should be build
-BUILD_FOR="centos ubuntu"
+BUILD_FOR=${BUILD_FOR:-centos ubuntu}
 
 DIR="$(dirname `readlink -f $0`)"
 MODULES="${DIR}/deployment_scripts/puppet/modules"
+
+# If true java and it dependencies will be part of the plugin.
+# Useful for offline deployments.
+INCLUDE_DEPENDENCIES=${INCLUDE_DEPENDENCIES:-false}
+
+# Patch ODL to use br-floating as external bridge
+USE_FUEL_PATCH=${USE_FUEL_PATCH:-true}
 
 function cleanup {
   rm -f "${DIR}/${TMP_NAME}"
@@ -37,16 +44,29 @@ function patch_odl {
   cp "${DIR}/odl_package/odl_lithium_patch/openstack.net-virt-1.1.1-Lithium-SR1.jar" "${DIR}/package/system/org/opendaylight/ovsdb/openstack.net-virt/1.1.1-Lithium-SR1/openstack.net-virt-1.1.1-Lithium-SR1.jar"
 }
 
+# Download packages required by ODL.
+# List generated with commands:
+#   yumdownloader --urls --resolve java-1.7.0-openjdk
+#   apt-get --print-uris --yes install openjdk-7-jre-headless | grep ^\' | cut -d\' -f2 >downloads.list
+function download_dependencies {
+  if [ "$INCLUDE_DEPENDENCIES" = true ]
+  then
+    wget -N -i "${DIR}/odl_package/${1}/dependencies.txt"
+  fi
+}
+
 function build_pkg {
   case $1 in
     centos)
       pushd "${DIR}/repositories/${1}/"
       fpm --force -s dir -t rpm --version "${ODL_VERSION_NUMBER}" --description "${ODL_DESCRIPTION}" --prefix /opt/opendaylight --rpm-init "${DIR}/odl_package/${1}/opendaylight" --after-install "${DIR}/odl_package/${1}/opendaylight-post" --name opendaylight -d "java-1.7.0-openjdk" -C "${DIR}/package"
+      download_dependencies ${1}
       popd
       ;;
     ubuntu)
       pushd "${DIR}/repositories/${1}/"
       fpm --force -s dir -t deb --version "${ODL_VERSION_NUMBER}" --description "${ODL_DESCRIPTION}" --prefix /opt/opendaylight --deb-upstart "${DIR}/odl_package/${1}/opendaylight" --after-install "${DIR}/odl_package/${1}/opendaylight-post" --name opendaylight -d "openjdk-7-jre-headless" -C "${DIR}/package"
+      download_dependencies ${1}
       popd
       ;;
     *) echo "Not supported system"; exit 1;;
@@ -67,7 +87,10 @@ else
   unpack $ODL_TARBALL_LOCATION
 fi
 
-patch_odl
+if [ "$USE_FUEL_PATCH" = true ]
+then
+  patch_odl
+fi
 
 for system in $BUILD_FOR
 do
