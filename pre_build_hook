@@ -14,6 +14,8 @@ ODL_VERSION_NUMBER=${ODL_VERSION_NUMBER:-0.3.1}
 ODL_DESCRIPTION="OpenDaylight SDN Controller"
 TMP_NAME="karaf-odl.tar.gz"
 
+OVS_VERSION="2.3.2"
+
 # For which systems odl package should be build
 BUILD_FOR=${BUILD_FOR:-centos ubuntu}
 
@@ -62,12 +64,30 @@ function build_pkg {
       fpm --force -s dir -t rpm --version "${ODL_VERSION_NUMBER}" --description "${ODL_DESCRIPTION}" --prefix /opt/opendaylight --rpm-init "${DIR}/odl_package/${1}/opendaylight" --after-install "${DIR}/odl_package/${1}/opendaylight-post" --name opendaylight -d "java-1.7.0-openjdk" -C "${DIR}/package"
       download_dependencies ${1}
       popd
+      sudo yum install redhat-rpm-config rpm-build openssl-devel wget kernel-devel gcc -y
+      sudo yum groupinstall "Development Tools"
+      wget http://openvswitch.org/releases/openvswitch-${OVS_VERSION}.tar.gz
+      tar xfz openvswitch-${OVS_VERSION}.tar.gz
+      mkdir -p ~/rpmbuild/SOURCES
+      cp openvswitch-${OVS_VERSION}.tar.gz rpmbuild/SOURCES
+      cd openvswitch-${OVS_VERSION}
+      cp rhel/openvswitch-kmod.files ~/rpmbuild/SOURCES/
+      sudo rpmbuild -bb rhel/openvswitch-kmod-rhel6.spec
+      sudo rpmbuild -bb rhel/openvswitch.spec
+      mv ~/rpmbuild/RPMS/x86_64/*.rpm ${DIR}/repositories/centos/
       ;;
     ubuntu)
       pushd "${DIR}/repositories/${1}/"
       fpm --force -s dir -t deb --version "${ODL_VERSION_NUMBER}" --description "${ODL_DESCRIPTION}" --prefix /opt/opendaylight --deb-upstart "${DIR}/odl_package/${1}/opendaylight" --after-install "${DIR}/odl_package/${1}/opendaylight-post" --name opendaylight -d "openjdk-7-jre-headless" -C "${DIR}/package"
       download_dependencies ${1}
       popd
+      sudo apt-get install build-essential fakeroot debhelper libssl-dev -y
+      wget http://openvswitch.org/releases/openvswitch-${OVS_VERSION}.tar.gz
+      tar -xzf openvswitch-${OVS_VERSION}.tar.gz
+      cd openvswitch-${OVS_VERSION}
+      DEB_BUILD_OPTIONS='parallel=8 nocheck' fakeroot debian/rules binary
+      cd ..
+      mv openvswitch*.deb ${DIR}/repositories/ubuntu/
       ;;
     *) echo "Not supported system"; exit 1;;
   esac
