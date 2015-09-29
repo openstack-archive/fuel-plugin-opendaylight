@@ -3,7 +3,7 @@ name: opendaylight
 # Human-readable name for your plugin
 title: OpenDaylight Lithium plugin
 # Plugin version
-version: '0.6.1'
+version: '0.6.2'
 # Description
 description: 'This plugin provides OpenDaylight as a backend for neutron.
 Use the same IP address as for OpenStack Horizon and port 8181 to reach dlux web ui and apidoc explorer.

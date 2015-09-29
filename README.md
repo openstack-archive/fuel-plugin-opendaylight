@@ -97,15 +97,10 @@ It is possible to modify process of building plugin by setting environment varia
 Dependencies
 ------------
 
-OpenDaylight controller require Java Runtime Environment. In case of CentOS system it is required to point
-repository where java rpm package can be found. It can be done in Settings tab in Repositories section.
-It is important to assign highest priority to mos repositories (lower number is a higher priority).
+OpenDaylight controller require Java Runtime Environment.
+If you plan to use plugin in environment without internet access or/and CentOS environment modify build command:
 
-![OpenDaylight repositories](./figures/opendaylight-repositories.png "OpenDaylight repositories")
-
-If you plan to use plugin in environment without internet access modify build command:
-
-        INCLUDE_DEPENDENCIES=true fpb --build fuel-plugin-opendaylight/
+     INCLUDE_DEPENDENCIES=true fpb --build fuel-plugin-opendaylight/
 
 Pre build script will try download required dependencies so it become part of the compiled plugin.
 
@@ -142,6 +137,10 @@ Release Notes
 **0.6.1**
 
 * Integrate Lithium SR1 with OpenStack Juno.
+
+**0.6.2**
+
+* Fix MTU for vxlan segmentation type.
 
 Development
 ===========
