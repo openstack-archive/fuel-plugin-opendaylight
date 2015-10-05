@@ -28,7 +28,7 @@
   parameters:
     puppet_manifest: puppet/manifests/disable-ovs-agent.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
-    timeout: 60
+    timeout: 120
 - id: odl_stop_neutron
   role: ['primary-controller', 'controller']
   stage: post_deployment/4470
@@ -36,7 +36,7 @@
   parameters:
     puppet_manifest: puppet/manifests/stop-neutron.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
-    timeout: 60
+    timeout: 120
 - id: odl_recreate_ovs
   role: ['primary-controller', 'controller', 'compute']
   stage: post_deployment/4475
@@ -44,7 +44,7 @@
   parameters:
     puppet_manifest: puppet/manifests/recreate-ovs.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
-    timeout: 60
+    timeout: 120
 - id: odl_ml2_configuration
   role: ['primary-controller', 'controller', 'compute']
   stage: post_deployment/4480
@@ -52,7 +52,7 @@
   parameters:
     puppet_manifest: puppet/manifests/ml2-configuration.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
-    timeout: 60
+    timeout: 120
 - id: odl_recreate_neutron_db
   role: ['primary-controller']
   stage: post_deployment/4485
@@ -60,7 +60,7 @@
   parameters:
     puppet_manifest: puppet/manifests/recreate-neutron-db.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
-    timeout: 60
+    timeout: 180
 - id: odl_setup_floating
   role: ['primary-controller', 'controller']
   stage: post_deployment/4490
@@ -68,7 +68,7 @@
   parameters:
     puppet_manifest: puppet/manifests/setup-floating.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
-    timeout: 60
+    timeout: 120
 - id: odl_start_neutron
   role: ['primary-controller', 'controller']
   stage: post_deployment/4495
