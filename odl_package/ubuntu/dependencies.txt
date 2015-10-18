@@ -23,4 +23,4 @@ http://archive.ubuntu.com/ubuntu/pool/main/t/tzdata/tzdata_2015g-0ubuntu0.14.04_
 http://archive.ubuntu.com/ubuntu/pool/main/t/tzdata/tzdata-java_2015g-0ubuntu0.14.04_all.deb
 http://archive.ubuntu.com/ubuntu/pool/main/j/java-common/java-common_0.51_all.deb
 http://archive.ubuntu.com/ubuntu/pool/main/libj/libjpeg8-empty/libjpeg8_8c-2ubuntu8_amd64.deb
-http://archive.ubuntu.com/ubuntu/pool/main/o/openjdk-7/openjdk-7-jre-headless_7u79-2.5.6-0ubuntu1.14.04.1_amd64.deb
+http://security.ubuntu.com/ubuntu/pool/main/o/openjdk-7/openjdk-7-jre-headless_7u85-2.6.1-5ubuntu0.14.04.1_amd64.deb
