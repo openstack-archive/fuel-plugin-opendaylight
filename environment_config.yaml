@@ -17,6 +17,31 @@ attributes:
         - odl-dlux-all
         - odl-mdsal-apidocs
         - odl-ovsdb-openstack
+      sfc:
+        - odl-sfc-core
+        - odl-sfc-model
+        - odl-sfc-netconf
+        - odl-sfc-ovs
+        - odl-sfc-provider
+        - odl-sfc-sb-rest
+        - odl-sfc-ui
+        - odl-sfclisp
+        - odl-sfcofl2
+      gbp:
+        - odl-groupbasedpolicy-base
+        - odl-groupbasedpolicy-ofoverlay
+        - odl-groupbasedpolicy-ui
+        - odl-groupbasedpolicy-uibackend
+  enable_sfc:
+    weight: 10
+    type: "checkbox"
+    value: false
+    label: "SFC features"
+  enable_gbp:
+    weight: 11
+    type: "checkbox"
+    value: false
+    label: "GBP features"
   use_vxlan:
     type: "checkbox"
     weight: 20
