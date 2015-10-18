@@ -7,12 +7,43 @@ class opendaylight::service (
   $roles = node_roles($nodes_hash, hiera('uid'))
   $management_vip = hiera('management_vip')
 
-  $karaf_default_features = ['config', 'standard', 'region', 'package', 'kar', 'ssh', 'management']
-  $karaf_odl_features = ['odl-restconf-all', 'odl-aaa-authn', 'odl-dlux-all', 'odl-mdsal-apidocs', 'odl-ovsdb-openstack']
+  $karaf_default_features = ['config',
+                             'standard',
+                             'region',
+                             'package',
+                             'kar',
+                             'ssh',
+                             'management']
+  $karaf_odl_features     = ['odl-restconf-all',
+                             'odl-aaa-authn',
+                             'odl-dlux-all',
+                             'odl-mdsal-apidocs',
+                             'odl-ovsdb-openstack']
+  $karaf_odl_gbp_features = ['odl-groupbasedpolicy-base',
+                             'odl-groupbasedpolicy-ofoverlay',
+                             'odl-groupbasedpolicy-ui',
+                             'odl-groupbasedpolicy-uibackend']
+  $karaf_odl_sfc_features = ['odl-sfc-core',
+                             'odl-sfc-model',
+                             'odl-sfc-netconf',
+                             'odl-sfc-ovs',
+                             'odl-sfc-provider',
+                             'odl-sfc-sb-rest',
+                             'odl-sfc-ui',
+                             'odl-sfclisp',
+                             'odl-sfcofl2']
 
   if member($roles, 'primary-controller') {
 
-    $features = union($karaf_default_features, $karaf_odl_features)
+    if $opendaylight::odl_settings['deploy_sfc'] {
+      $features = union($karaf_default_features,
+                        $karaf_odl_features,
+                        $karaf_odl_gbp_features,
+                        $karaf_odl_sfc_features)
+    } else {
+      $features = union($karaf_default_features,
+                        $karaf_odl_features)
+    }
 
     firewall {'215 odl':
       port   => [ $opendaylight::rest_api_port, 6633, 6640, 6653, 8181, 8101],

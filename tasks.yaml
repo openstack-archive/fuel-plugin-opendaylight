@@ -77,3 +77,10 @@
     puppet_manifest: puppet/manifests/start-neutron.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
     timeout: 210
+- id: odl_finalize_sfc
+  role: ['primary-controller']
+  stage: post_deployment/4496
+  type: shell
+  parameters:
+    cmd: bash sfc-defaults.sh
+    timeout: 120
