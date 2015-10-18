@@ -77,3 +77,17 @@
     puppet_manifest: puppet/manifests/start-neutron.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
     timeout: 210
+- id: odl_bless_ovs
+  role: ['primary-controller', 'controller', 'compute']
+  stage: post_deployment/4496
+  type: shell
+  parameters:
+    cmd: bash tune-ovs-openflow.sh
+    timeout: 60
+- id: odl_finalize_sfc
+  role: ['primary-controller']
+  stage: post_deployment/4497
+  type: shell
+  parameters:
+    cmd: bash sfc-defaults.sh
+    timeout: 120
