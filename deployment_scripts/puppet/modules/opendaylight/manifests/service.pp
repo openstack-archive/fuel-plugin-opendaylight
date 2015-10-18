@@ -45,6 +45,17 @@ class opendaylight::service (
     $enable['default'] = $features['default']
     $enable['ovsdb'] = $features['ovsdb']
 
+    if $odl['enable_sfc'] {
+      $enable['config'] = $features['config']
+      $enable['netconf'] = $features['netconf']
+      $enable['oflp'] = $features['oflp']
+      $enable['sfc'] = $features['sfc']
+    }
+
+    if $odl['enable_gbp'] {
+      $enable['gbp'] = $features['gbp']
+    }
+
     file { '/opt/opendaylight/etc/org.apache.karaf.features.cfg':
       ensure  => file,
       owner   => 'odl',
@@ -54,7 +65,7 @@ class opendaylight::service (
     exec { 'wait-until-odl-ready':
       command   => "curl -o /dev/null --fail --silent --head -u admin:admin http://${management_vip}:${rest_port}/restconf/operational/network-topology:network-topology/topology/netvirt:1",
       path      => '/bin:/usr/bin',
-      tries     => 60,
+      tries     => 50,
       try_sleep => 20,
       require   => Service['opendaylight'],
     }
