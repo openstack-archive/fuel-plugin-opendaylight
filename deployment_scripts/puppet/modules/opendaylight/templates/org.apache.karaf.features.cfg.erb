@@ -41,7 +41,7 @@ featuresRepositories = mvn:org.apache.karaf.features/standard/3.0.3/xml/features
 #
 # Comma separated list of features to install at startup
 #
-featuresBoot=<%= @features.join(',') %>
+featuresBoot=<%= @enable.map{|k,v| "#{v.join(',')}"}.join(',') %>
 
 #
 # Defines if the boot features are started in asynchronous mode (in a dedicated thread)

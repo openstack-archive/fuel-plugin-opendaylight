@@ -6,13 +6,11 @@ class opendaylight::service (
   $nodes_hash = hiera('nodes', {})
   $roles = node_roles($nodes_hash, hiera('uid'))
   $management_vip = hiera('management_vip')
-
-  $karaf_default_features = ['config', 'standard', 'region', 'package', 'kar', 'ssh', 'management']
-  $karaf_odl_features = ['odl-restconf-all', 'odl-aaa-authn', 'odl-dlux-all', 'odl-mdsal-apidocs', 'odl-ovsdb-openstack']
+  $odl = hiera("opendaylight")
+  $features = $odl['metadata']['odl_features']
+  $enable = {}
 
   if member($roles, 'primary-controller') {
-
-    $features = union($karaf_default_features, $karaf_odl_features)
 
     firewall {'215 odl':
       port   => [ $opendaylight::rest_api_port, 6633, 6640, 6653, 8181, 8101],
@@ -43,6 +41,9 @@ class opendaylight::service (
       owner   => 'odl',
       content => template('opendaylight/custom.properties.erb'),
     }
+
+    $enable['default'] = $features['default']
+    $enable['ovsdb'] = $features['ovsdb']
 
     file { '/opt/opendaylight/etc/org.apache.karaf.features.cfg':
       ensure  => file,

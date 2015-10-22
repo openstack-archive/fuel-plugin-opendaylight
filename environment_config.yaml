@@ -2,6 +2,21 @@ attributes:
   metadata:
     restrictions:
       - "cluster:net_provider != 'neutron'": "Only neutron is supported by OpenDaylight"
+    odl_features:
+      default:
+        - config
+        - standard
+        - region
+        - package
+        - kar
+        - ssh
+        - management
+      ovsdb:
+        - odl-restconf-all
+        - odl-aaa-authn
+        - odl-dlux-all
+        - odl-mdsal-apidocs
+        - odl-ovsdb-openstack
   use_vxlan:
     type: "checkbox"
     weight: 20
