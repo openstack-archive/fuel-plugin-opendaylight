@@ -12,6 +12,9 @@ $physnet = $nets['net04']['L2']['physnet']
 $segment_id = $nets['net04']['L2']['segment_id']
 $vm_net_l3 = $nets['net04']['L3']
 
+$mv = hiera('management_vip')
+$rp = $opendaylight::rest_api_port
+
 if $opendaylight::odl_settings['use_vxlan'] {
   $segmentation_type = 'vxlan'
 } else {
@@ -50,6 +53,12 @@ if member($roles, 'primary-controller') {
     path      => '/usr/bin:/usr/sbin',
     tries     => 3,
     try_sleep => 10,
+  } ->
+  exec {'wait-neutron-head':
+    command   => "curl -o /dev/null --silent --head --fail -u admin:admin http://${mv}:${rp}/controller/nb/v2/neutron/networks",
+    path      => '/usr/bin:/usr/sbin',
+    tries     => 10,
+    try_sleep => 20,
   } ->
   openstack::network::create_network{'net04':
     netdata => $vm_net,

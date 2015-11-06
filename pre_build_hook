@@ -44,6 +44,60 @@ function patch_odl {
   cp "${DIR}/odl_package/odl_lithium_patch/openstack.net-virt-1.1.1-Lithium-SR1.jar" "${DIR}/package/system/org/opendaylight/ovsdb/openstack.net-virt/1.1.1-Lithium-SR1/openstack.net-virt-1.1.1-Lithium-SR1.jar"
 }
 
+
+#  Add default VNF image from Canonical's site. if
+# $INCLUDE_DEPENDENCIES is true, we will embed the
+# cloud image otherwishe we set its URI from where
+# glance can download it. VNFSCR script name must
+# match what is defined in tasks.yam
+function embed_image {
+  local  VNFSCR="${DIR}/deployment_scripts/vnf-image.sh"
+  local  VNFURL=${VNFURL:-"http://uec-images.ubuntu.com/releases/14.04/release"}
+  local  VNFILE="ubuntu-14.04-server-cloudimg-amd64-disk1.img"
+  local VNFBDIR="/tmp/$$"
+  local  DEPLOY="dodeploy.sh"
+
+  rm -f ${VNFSCR}
+  if [ "$INCLUDE_DEPENDENCIES" = true ]
+  then
+    mkdir "${VNFBDIR}" && pushd "${VNFBDIR}"
+    git clone https://github.com/megastep/makeself.git
+    mkdir img && cd img
+    cat >>${DEPLOY} <<EOF
+#!/bin/bash
+
+source /root/openrc
+#vnf core image
+glance image-create\
+ --name="imgvnf"\
+ --is-public=true\
+ --disk-format=qcow2\
+ --container-format=bare\
+ --file ${VNFILE}
+EOF
+    chmod +x ${DEPLOY}
+    wget -N "${VNFURL}/${VNFILE}"
+    env PATH="${VNFBDIR}/makeself:${PATH}" makeself.sh --current --base64 . ${VNFSCR} "qcow2 archive" ./${DEPLOY}
+    popd
+    rm -rf "${VNFBDIR}"
+  else
+    cat >>${VNFSCR} <<EOF
+#!/bin/bash
+
+source /root/openrc
+#vnf core image
+glance image-create\
+ --name="imgvnf"\
+ --is-public=true\
+ --disk-format=qcow2\
+ --container-format=bare\
+ --copy-from ${VNFURL}/${VNFILE}
+EOF
+  fi
+  chmod +x ${VNFSCR}
+}
+
+
 # Download packages required by ODL.
 # List generated with commands:
 #   yumdownloader --urls --resolve java-1.7.0-openjdk
@@ -56,6 +110,7 @@ function download_dependencies {
 }
 
 function build_pkg {
+  embed_image
   case $1 in
     centos)
       pushd "${DIR}/repositories/${1}/"

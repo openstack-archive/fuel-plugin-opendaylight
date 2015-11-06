@@ -11,12 +11,35 @@ attributes:
         - kar
         - ssh
         - management
-      ovsdb:
+      gbp:
+        - odl-groupbasedpolicy-base
+        - odl-groupbasedpolicy-ofoverlay
+      openstack:
+        - odl-ovsdb-openstack
         - odl-restconf-all
         - odl-aaa-authn
+        - odl-l2switch-switch-ui
         - odl-dlux-all
-        - odl-mdsal-apidocs
-        - odl-ovsdb-openstack
+      sfc:
+        - odl-sfc-model
+        - odl-sfc-provider
+        - odl-sfc-core
+        - odl-sfc-sb-rest
+        - odl-sfc-ui
+        - odl-sfc-netconf
+        - odl-sfc-ovs
+        - odl-sfcofl2
+        - odl-sfc-test-consumer
+  enable_sfc:
+    weight: 10
+    type: "checkbox"
+    value: false
+    label: "SFC features"
+  enable_gbp:
+    weight: 11
+    type: "checkbox"
+    value: false
+    label: "GBP features"
   use_vxlan:
     type: "checkbox"
     weight: 20
