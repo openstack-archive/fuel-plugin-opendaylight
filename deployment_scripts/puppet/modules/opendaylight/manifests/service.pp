@@ -45,6 +45,17 @@ class opendaylight::service (
     $enable['default'] = $features['default']
     $enable['ovsdb'] = $features['ovsdb']
 
+    if $odl['enable_sfc'] {
+      $enable['config'] = $features['config']
+      $enable['netconf'] = $features['netconf']
+      $enable['oflp'] = $features['oflp']
+      $enable['sfc'] = $features['sfc']
+    }
+
+    if $odl['enable_gbp'] {
+      $enable['gbp'] = $features['gbp']
+    }
+
     file { '/opt/opendaylight/etc/org.apache.karaf.features.cfg':
       ensure  => file,
       owner   => 'odl',
