@@ -39,4 +39,9 @@ if $segmentation_type != 'vlan' {
       group   => 'root',
       content => template('openstack/neutron/dnsmasq-neutron.conf.erb'),
   }
+} else {
+    neutron_plugin_ml2 {
+      'ml2/tenant_network_types':   value => 'vlan';
+      'ml2/type_drivers':   value => ['local', 'flat', 'vlan', 'gre', 'vxlan'];
+    }
 }
