@@ -11,12 +11,58 @@ attributes:
         - kar
         - ssh
         - management
+        - http
+        - webconsole
+      config:
+        - odl-config-api
+        - odl-config-netty-config-api
+        - odl-config-core
+        - odl-config-manager
+        - odl-config-all
+      netconf:
+        - odl-netconf-mdsal
+        - odl-netconf-connector-ssh
+        - odl-netconf-connector
+        - odl-netconf-connector-all
+        - odl-netconf-client
+        - odl-netconf-netty-util
+        - odl-netconf-all
+        - odl-netconf-tcp
       ovsdb:
         - odl-restconf-all
         - odl-aaa-authn
+        - odl-aaa-netconf-plugin
         - odl-dlux-all
         - odl-mdsal-apidocs
         - odl-ovsdb-openstack
+      oflp:
+        - odl-openflowplugin-flow-services-ui
+        - odl-openflowplugin-flow-services-rest
+        - odl-openflowplugin-all
+      sfc:
+        - odl-sfc-core
+        - odl-sfc-model
+        - odl-sfc-provider
+        - odl-sfc-sb-rest
+        - odl-sfc-ui
+        - odl-sfc-netconf
+        - odl-sfc-ovs
+        - odl-sfcofl2
+        - odl-sfc-test-consumer
+      gbp:
+        - odl-groupbasedpolicy-base
+        - odl-groupbasedpolicy-ofoverlay
+        - odl-groupbasedpolicy-neutronmapper
+  enable_sfc:
+    weight: 10
+    type: "checkbox"
+    value: false
+    label: "SFC features"
+  enable_gbp:
+    weight: 11
+    type: "checkbox"
+    value: false
+    label: "GBP features"
   use_vxlan:
     type: "checkbox"
     weight: 20
