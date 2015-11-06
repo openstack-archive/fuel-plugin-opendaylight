@@ -1,5 +1,5 @@
 class opendaylight::service (
-  $rest_port = 8282,
+  $rest_port = $opendaylight::rest_api_port,
   $bind_address = undef
 ) {
 
@@ -43,7 +43,15 @@ class opendaylight::service (
     }
 
     $enable['default'] = $features['default']
-    $enable['ovsdb'] = $features['ovsdb']
+    $enable['openstack'] = $features['openstack']
+
+    if $odl['enable_sfc'] {
+      $enable['sfc'] = $features['sfc']
+    }
+
+    if $odl['enable_gbp'] {
+      $enable['gbp'] = $features['gbp']
+    }
 
     file { '/opt/opendaylight/etc/org.apache.karaf.features.cfg':
       ensure  => file,
@@ -71,4 +79,5 @@ class opendaylight::service (
       action => 'accept',
     }
   }
+
 }
