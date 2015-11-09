@@ -10,9 +10,9 @@ http://archive.ubuntu.com/ubuntu/pool/main/f/fontconfig/fontconfig-config_2.11.0
 http://archive.ubuntu.com/ubuntu/pool/main/f/fontconfig/libfontconfig1_2.11.0-0ubuntu4.1_amd64.deb
 http://archive.ubuntu.com/ubuntu/pool/main/libj/libjpeg-turbo/libjpeg-turbo8_1.3.0-0ubuntu2_amd64.deb
 http://archive.ubuntu.com/ubuntu/pool/main/l/lcms2/liblcms2-2_2.5-0ubuntu4_amd64.deb
-http://archive.ubuntu.com/ubuntu/pool/main/n/nspr/libnspr4_4.10.7-0ubuntu0.14.04.1_amd64.deb
-http://archive.ubuntu.com/ubuntu/pool/main/n/nss/libnss3-nssdb_3.19.2-0ubuntu0.14.04.1_all.deb
-http://archive.ubuntu.com/ubuntu/pool/main/n/nss/libnss3_3.19.2-0ubuntu0.14.04.1_amd64.deb
+http://archive.ubuntu.com/ubuntu/pool/main/n/nspr/libnspr4_4.10.10-0ubuntu0.14.04.1_amd64.deb
+http://archive.ubuntu.com/ubuntu/pool/main/n/nss/libnss3-nssdb_3.19.2.1-0ubuntu0.14.04.1_all.deb
+http://archive.ubuntu.com/ubuntu/pool/main/n/nss/libnss3_3.19.2.1-0ubuntu0.14.04.1_i386.deb
 http://archive.ubuntu.com/ubuntu/pool/main/p/pcsc-lite/libpcsclite1_1.8.10-1ubuntu1_amd64.deb
 http://archive.ubuntu.com/ubuntu/pool/main/libv/libvorbis/libvorbis0a_1.3.2-1.3ubuntu1_amd64.deb
 http://archive.ubuntu.com/ubuntu/pool/main/libv/libvorbis/libvorbisenc2_1.3.2-1.3ubuntu1_amd64.deb
