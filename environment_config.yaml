@@ -1,4 +1,19 @@
 attributes:
+  enable_gbp:
+    weight: 14
+    type: "checkbox"
+    value: false
+    label: "GBP features"
+  enable_l3_odl:
+    weight: 12
+    type: "checkbox"
+    value: false
+    label: "EXPERIMENTAL: Use ODL to manage L3 traffic"
+  enable_sfc:
+    weight: 13
+    type: "checkbox"
+    value: false
+    label: "SFC features"
   metadata:
     restrictions:
       - "cluster:net_provider != 'neutron'": "Only neutron is supported by OpenDaylight"
@@ -11,17 +26,22 @@ attributes:
         - kar
         - ssh
         - management
-      ovsdb:
+      gbp:
+        - odl-groupbasedpolicy-base
+        - odl-groupbasedpolicy-ofoverlay
+      ovs:
+        - odl-ovsdb-openstack
         - odl-restconf-all
         - odl-aaa-authn
         - odl-dlux-all
-        - odl-mdsal-apidocs
-        - odl-ovsdb-openstack
-  enable_l3_odl:
-    weight: 12
-    type: "checkbox"
-    value: false
-    label: "EXPERIMENTAL: Use ODL to manage L3 traffic"
+      sfc:
+        - odl-sfc-core
+        - odl-sfc-sb-rest
+        - odl-sfc-ui
+        - odl-sfc-netconf
+        - odl-sfc-ovs
+        - odl-sfcofl2
+        - odl-sfc-test-consumer
   rest_api_port:
     value: '8282'
     label: 'Port number'
