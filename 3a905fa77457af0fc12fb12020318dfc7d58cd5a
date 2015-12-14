@@ -1,0 +1,8 @@
+Verified+2: Jenkins
+Code-Review+2: Michal Skalski <mskalski@mirantis.com>
+Workflow+1: Michal Skalski <mskalski@mirantis.com>
+Submitted-by: Jenkins
+Submitted-at: Mon, 14 Dec 2015 12:35:34 +0000
+Reviewed-on: https://review.openstack.org/257320
+Project: openstack/fuel-plugin-opendaylight
+Branch: refs/heads/7.0
