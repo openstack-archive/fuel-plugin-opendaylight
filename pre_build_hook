@@ -18,6 +18,10 @@ TMP_NAME="karaf-odl.tar.gz"
 NETWORKING_ODL_REPO=${NETWORKING_ODL_REPO:-https://github.com/openstack/networking-odl.git}
 NETWORKING_ODL_BRANCH=${NETWORKING_ODL_BRANCH:-stable/kilo}
 
+#Opnfv-quagga-packaging
+OPNFV_QUAGGE_PACKAGING_REPO=${OPNFV_QUAGGE_PACKAGING_REPO:-https://github.com/nikolas-hermanns/opnfv-quagga-packaging}
+OPNFV_QUAGGE_PACKAGING_BRANCH=stable/brahmaputra
+
 # For which systems odl package should be build
 BUILD_FOR=${BUILD_FOR:-ubuntu}
 
@@ -45,6 +49,21 @@ function unpack {
   tar xzf $1 --strip-components=1 -C "${TMP_DIR}/${2}"
 }
 
+function add_opnfv_quagga {
+    path=$1
+    pushd ${TMP_DIR}
+        git clone $OPNFV_QUAGGE_PACKAGING_REPO opnfv-quagga
+        pushd opnfv-quagga
+            git checkout $OPNFV_QUAGGE_PACKAGING_BRANCH
+            if [ ! -e debian_package/*.deb ];then
+                sudo apt-get -y install `cat requirements.txt`
+                make
+            fi
+            cp debian_package/* $path
+        popd
+    popd
+
+}
 function patch_odl {
   cp "${DIR}/odl_package/odl_lithium_patch/openstack.net-virt-1.1.2-Lithium-SR2.jar" "${TMP_DIR}/opendaylight_src/system/org/opendaylight/ovsdb/openstack.net-virt/1.1.2-Lithium-SR2/openstack.net-virt-1.1.2-Lithium-SR2.jar"
 }
@@ -74,6 +93,7 @@ function build_pkg {
       fpm --force -s python -t deb -m 'mskalski@mirantis.com' --no-python-dependencies -d python-pbr -d python-babel -d python-neutron ${TMP_DIR}/networking_odl/setup.py
       download_dependencies ${1}
       popd
+      add_opnfv_quagga "${DIR}/repositories/${1}/"
       ;;
     *) echo "Not supported system"; exit 1;;
   esac
