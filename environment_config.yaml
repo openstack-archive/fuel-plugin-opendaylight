@@ -42,6 +42,12 @@ attributes:
         - odl-sfc-ovs
         - odl-sfcofl2
         - odl-sfc-test-consumer
+      vpn:
+        - odl-vpnservice-api
+        - odl-vpnservice-impl
+        - odl-vpnservice-impl-rest
+        - odl-vpnservice-impl-ui
+        - odl-vpnservice-core
   rest_api_port:
     value: '8282'
     label: 'Port number'
