@@ -19,6 +19,15 @@
     puppet_manifest: puppet/manifests/controller-pre.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
     timeout: 720
+- id: quagga_install
+  role: [opendaylight]
+  type: puppet
+  requires: [deploy_start]
+  required_for: [deploy_end, primary-controller, controller]
+  parameters:
+    puppet_manifest: puppet/manifests/quagga_extension.pp
+    puppet_modules: puppet/modules:/etc/puppet/modules
+    timeout: 120
 - id: odl_configure
   role: ['primary-controller', 'controller', 'compute', 'opendaylight']
   requires: [post_deployment_start]
