@@ -14,6 +14,11 @@ attributes:
     type: "checkbox"
     value: false
     label: "SFC features"
+  enable_vpn:
+    weight: 14
+    type: "checkbox"
+    value: false
+    label: "BGPVPN service"
   metadata:
     restrictions:
       - "cluster:net_provider != 'neutron'": "Only neutron is supported by OpenDaylight"
@@ -42,6 +47,12 @@ attributes:
         - odl-sfc-ovs
         - odl-sfcofl2
         - odl-sfc-test-consumer
+      vpn:
+        - odl-vpnservice-api
+        - odl-vpnservice-impl
+        - odl-vpnservice-impl-rest
+        - odl-vpnservice-impl-ui
+        - odl-vpnservice-core
   rest_api_port:
     value: '8282'
     label: 'Port number'

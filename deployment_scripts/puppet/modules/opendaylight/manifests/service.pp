@@ -52,6 +52,10 @@ class opendaylight::service (
       $enable['gbp'] = $features['gbp']
     }
 
+    if $odl['enable_vpn'] {
+      $enable['vpn'] = $features['vpn']
+    }
+
     file { '/opt/opendaylight/etc/org.apache.karaf.features.cfg':
       ensure  => file,
       owner   => 'odl',
