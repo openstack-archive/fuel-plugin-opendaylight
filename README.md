@@ -17,7 +17,7 @@ Requirements
 
 | Requirement                      | Version/Comment |
 |----------------------------------|-----------------|
-| Mirantis OpenStack compatibility | 7.0             |
+| Mirantis OpenStack compatibility | 8.0             |
 
 Recommendations
 ---------------
@@ -27,9 +27,7 @@ None.
 Limitations
 -----------
 
-* Supports only environments with Neutron.
 * HA for ovsdb feature is not implemented yet.
-* L3 traffic managed by neutron agent.
 
 Installation Guide
 ==================
@@ -91,18 +89,6 @@ Build options
 -------------
 
 It is possible to modify process of building plugin by setting environment variables. Look into [pre_build_hook file](pre_build_hook) for more details.
-
-Dependencies
-------------
-
-OpenDaylight controller require Java Runtime Environment.
-If you plan to use plugin in environment without internet access or/and CentOS environment modify build command:
-
-     INCLUDE_DEPENDENCIES=true fpb --build fuel-plugin-opendaylight/
-
-Pre build script will try download required dependencies so it become part of the compiled plugin.
-
-Note: List of packages for [ubuntu](odl_package/ubuntu/dependencies.txt) and [centos](odl_package/centos/dependencies.txt) may need to be modified if packages in centos or ubuntu repositories will change.
 
 Testing
 -------

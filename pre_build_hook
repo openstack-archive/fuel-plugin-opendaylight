@@ -7,16 +7,16 @@ set -eux
 
 # Where we can find odl karaf distribution tarball
 # can be http(s) url or absolute path
-ODL_TARBALL_LOCATION=${ODL_TARBALL_LOCATION:-https://nexus.opendaylight.org/content/repositories/opendaylight.release/org/opendaylight/integration/distribution-karaf/0.3.2-Lithium-SR2/distribution-karaf-0.3.2-Lithium-SR2.tar.gz}
+ODL_TARBALL_LOCATION=${ODL_TARBALL_LOCATION:-https://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/org/opendaylight/integration/distribution-karaf/0.4.0-SNAPSHOT/distribution-karaf-0.4.0-20160118.091622-3555.tar.gz}
 
 #Verion number used in deb/rpm package
-ODL_VERSION_NUMBER=${ODL_VERSION_NUMBER:-0.3.2}
+ODL_VERSION_NUMBER=${ODL_VERSION_NUMBER:-0.4.0}
 ODL_DESCRIPTION="OpenDaylight SDN Controller"
 TMP_NAME="karaf-odl.tar.gz"
 
 #Networking odl
 NETWORKING_ODL_REPO=${NETWORKING_ODL_REPO:-https://github.com/openstack/networking-odl.git}
-NETWORKING_ODL_BRANCH=${NETWORKING_ODL_BRANCH:-stable/kilo}
+NETWORKING_ODL_BRANCH=${NETWORKING_ODL_BRANCH:-stable/liberty}
 
 #Opnfv-quagga-packaging
 OPNFV_QUAGGE_PACKAGING_REPO=${OPNFV_QUAGGE_PACKAGING_REPO:-https://github.com/nikolas-hermanns/opnfv-quagga-packaging}
@@ -32,9 +32,6 @@ MODULES="${DIR}/deployment_scripts/puppet/modules"
 # If true java and it dependencies will be part of the plugin.
 # Useful for offline deployments.
 INCLUDE_DEPENDENCIES=${INCLUDE_DEPENDENCIES:-false}
-
-# Patch ODL to use br-floating as external bridge
-USE_FUEL_PATCH=${USE_FUEL_PATCH:-true}
 
 function cleanup {
   rm -rf "${TMP_DIR}"
@@ -64,9 +61,6 @@ function add_opnfv_quagga {
     popd
 
 }
-function patch_odl {
-  cp "${DIR}/odl_package/odl_lithium_patch/openstack.net-virt-1.1.2-Lithium-SR2.jar" "${TMP_DIR}/opendaylight_src/system/org/opendaylight/ovsdb/openstack.net-virt/1.1.2-Lithium-SR2/openstack.net-virt-1.1.2-Lithium-SR2.jar"
-}
 
 # Download packages required by ODL.
 # List generated with commands:
@@ -90,7 +84,7 @@ function build_pkg {
     ubuntu)
       pushd "${DIR}/repositories/${1}/"
       fpm --force -s dir -t deb -m 'mskalski@mirantis.com' --version "${ODL_VERSION_NUMBER}" --description "${ODL_DESCRIPTION}" --prefix /opt/opendaylight --deb-upstart "${DIR}/odl_package/${1}/opendaylight" --after-install "${DIR}/odl_package/${1}/opendaylight-post" --name opendaylight -d "openjdk-7-jre-headless" -C "${TMP_DIR}/opendaylight_src"
-      fpm --force -s python -t deb -m 'mskalski@mirantis.com' --no-python-dependencies -d python-pbr -d python-babel -d python-neutron ${TMP_DIR}/networking_odl/setup.py
+      fpm --force -s python -t deb -m 'mskalski@mirantis.com' --python-install-lib /usr/lib/python2.7/dist-packages ${TMP_DIR}/networking_odl/setup.py
       download_dependencies ${1}
       popd
       add_opnfv_quagga "${DIR}/repositories/${1}/"
@@ -113,11 +107,6 @@ then
   unpack $TMP_NAME 'opendaylight_src'
 else
   unpack $ODL_TARBALL_LOCATION 'opendaylight_src'
-fi
-
-if [ "$USE_FUEL_PATCH" = true ]
-then
-  patch_odl
 fi
 
 git clone $NETWORKING_ODL_REPO networking_odl
