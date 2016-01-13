@@ -7,16 +7,16 @@ set -eux
 
 # Where we can find odl karaf distribution tarball
 # can be http(s) url or absolute path
-ODL_TARBALL_LOCATION=${ODL_TARBALL_LOCATION:-https://nexus.opendaylight.org/content/repositories/opendaylight.release/org/opendaylight/integration/distribution-karaf/0.3.2-Lithium-SR2/distribution-karaf-0.3.2-Lithium-SR2.tar.gz}
+ODL_TARBALL_LOCATION=${ODL_TARBALL_LOCATION:-https://nexus.opendaylight.org/content/groups/public/org/opendaylight/integration/distribution-karaf/0.3.3-Lithium-SR3/distribution-karaf-0.3.3-Lithium-SR3.tar.gz}
 
 #Verion number used in deb/rpm package
-ODL_VERSION_NUMBER=${ODL_VERSION_NUMBER:-0.3.2}
+ODL_VERSION_NUMBER=${ODL_VERSION_NUMBER:-0.3.3}
 ODL_DESCRIPTION="OpenDaylight SDN Controller"
 TMP_NAME="karaf-odl.tar.gz"
 
 #Networking odl
 NETWORKING_ODL_REPO=${NETWORKING_ODL_REPO:-https://github.com/openstack/networking-odl.git}
-NETWORKING_ODL_BRANCH=${NETWORKING_ODL_BRANCH:-stable/kilo}
+NETWORKING_ODL_BRANCH=${NETWORKING_ODL_BRANCH:-stable/liberty}
 
 #Opnfv-quagga-packaging
 OPNFV_QUAGGE_PACKAGING_REPO=${OPNFV_QUAGGE_PACKAGING_REPO:-https://github.com/nikolas-hermanns/opnfv-quagga-packaging}
@@ -34,7 +34,7 @@ MODULES="${DIR}/deployment_scripts/puppet/modules"
 INCLUDE_DEPENDENCIES=${INCLUDE_DEPENDENCIES:-false}
 
 # Patch ODL to use br-floating as external bridge
-USE_FUEL_PATCH=${USE_FUEL_PATCH:-true}
+USE_FUEL_PATCH=${USE_FUEL_PATCH:-false}
 
 function cleanup {
   rm -rf "${TMP_DIR}"
@@ -90,7 +90,7 @@ function build_pkg {
     ubuntu)
       pushd "${DIR}/repositories/${1}/"
       fpm --force -s dir -t deb -m 'mskalski@mirantis.com' --version "${ODL_VERSION_NUMBER}" --description "${ODL_DESCRIPTION}" --prefix /opt/opendaylight --deb-upstart "${DIR}/odl_package/${1}/opendaylight" --after-install "${DIR}/odl_package/${1}/opendaylight-post" --name opendaylight -d "openjdk-7-jre-headless" -C "${TMP_DIR}/opendaylight_src"
-      fpm --force -s python -t deb -m 'mskalski@mirantis.com' --no-python-dependencies -d python-pbr -d python-babel -d python-neutron ${TMP_DIR}/networking_odl/setup.py
+      fpm --force -s python -t deb -m 'mskalski@mirantis.com' --python-install-lib /usr/lib/python2.7/dist-packages ${TMP_DIR}/networking_odl/setup.py
       download_dependencies ${1}
       popd
       add_opnfv_quagga "${DIR}/repositories/${1}/"
