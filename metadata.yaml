@@ -1,16 +1,16 @@
 # Plugin name
 name: opendaylight
 # Human-readable name for your plugin
-title: OpenDaylight Lithium plugin
+title: OpenDaylight plugin
 # Plugin version
-version: '0.7.0'
+version: '0.8.0'
 # Description
 description: 'This plugin provides OpenDaylight as a backend for neutron.
 Use the same IP address as for OpenStack Horizon and port 8181 to reach dlux web ui and apidoc explorer.
-  DLUX: http://horizon_ip:8181/index.html, 
-  APIDOC: http://horizon_ip:8181/apidoc/explorer/index.html'
+  DLUX: http://<VIP>:8181/index.html, 
+  APIDOC: http://<VIP>:8181/apidoc/explorer/index.html'
 # Required fuel version
-fuel_version: ['7.0']
+fuel_version: ['8.0']
 # Specify license of your plugin
 licenses: ['Apache License Version 2.0']
 # Specify author or company name
@@ -24,7 +24,7 @@ groups: ['network']
 # The plugin is compatible with releases in the list
 releases:
   - os: ubuntu
-    version: 2015.1.0-7.0
+    version: 2015.1.0-8.0
     mode: ['ha', 'multinode']
     deployment_scripts_path: deployment_scripts/
     repository_path: repositories/ubuntu
