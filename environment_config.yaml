@@ -8,7 +8,10 @@ attributes:
     weight: 12
     type: "checkbox"
     value: false
-    label: "EXPERIMENTAL: Use ODL to manage L3 traffic"
+    label: "Use ODL to manage L3 traffic"
+    restrictions:
+      - networking_parameters:segmentation_type == 'vlan': Use tunneling segmentation type.
+      - settings:public_network_assignment.assign_to_all_nodes.value == false: Assign public network to all nodes
   enable_sfc:
     weight: 13
     type: "checkbox"

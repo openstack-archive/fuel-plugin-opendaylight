@@ -17,19 +17,12 @@ Requirements
 
 | Requirement                      | Version/Comment |
 |----------------------------------|-----------------|
-| Mirantis OpenStack compatibility | 7.0             |
-
-Recommendations
----------------
-
-None.
+| Mirantis OpenStack compatibility | 8.0             |
 
 Limitations
 -----------
 
-* Supports only environments with Neutron.
-* HA for ovsdb feature is not implemented yet.
-* L3 traffic managed by neutron agent.
+* HA for ODL controller is not implemented yet.
 
 Installation Guide
 ==================
@@ -82,7 +75,7 @@ OpenDaylight plugin configuration
 
 1. Create a new environment with the Fuel UI wizard.
 2. Click on the Settings tab of the Fuel web UI.
-3. Select "OpenDaylight Lithium plugin" section.
+3. Select "OpenDaylight plugin" section.
 4. Tick the checkbox and click "Save Settings" button.
 5. Assign role OPENDAYLIGHT to one of the node.
 
@@ -92,29 +85,16 @@ Build options
 
 It is possible to modify process of building plugin by setting environment variables. Look into [pre_build_hook file](pre_build_hook) for more details.
 
-Dependencies
-------------
-
-OpenDaylight controller require Java Runtime Environment.
-If you plan to use plugin in environment without internet access or/and CentOS environment modify build command:
-
-     INCLUDE_DEPENDENCIES=true fpb --build fuel-plugin-opendaylight/
-
-Pre build script will try download required dependencies so it become part of the compiled plugin.
-
-Note: List of packages for [ubuntu](odl_package/ubuntu/dependencies.txt) and [centos](odl_package/centos/dependencies.txt) may need to be modified if packages in centos or ubuntu repositories will change.
-
 Testing
 -------
 
 Use the same IP address as for OpenStack Horizon panel and port 8181 to reach dlux web ui and apidoc explorer:
 
 * DLUX: http://horizon_ip:8181/index.html
-* APIDOC: http://horizon_ip:8181/apidoc/explorer/index.html
 
-OpenDaylight files are stored on primary controller inside */opt/opendaylight* directory.
+OpenDaylight files are stored on node with 'OpenDaylight' role assigned inside */opt/opendaylight* directory.
 
-To log in to OpenDayligt shell run */opt/opendaylight/bin/client*
+To log in to OpenDayligt shell run */opt/opendaylight/bin/client -u karaf*
 
 Known issues
 ------------

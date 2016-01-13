@@ -18,6 +18,8 @@ class opendaylight::ha::haproxy {
   $public_vip = hiera('public_vip')
   $management_vip = hiera('management_vip')
   $nodes_hash = hiera('nodes')
+  $odl = hiera('opendaylight')
+  $api_port = $odl['rest_api_port']
   $primary_controller_nodes = filter_nodes($nodes_hash,'role','primary-controller')
   $odl_controllers = filter_nodes($nodes_hash,'role','opendaylight')
 
@@ -44,11 +46,11 @@ class opendaylight::ha::haproxy {
     balancermember_options => 'check inter 2000 fall 3',
   }
 
-  openstack::ha::haproxy_service { 'odl-tomcat':
+  openstack::ha::haproxy_service { 'odl-neutron-endpoint':
     order                  => '215',
-    listen_port            => $opendaylight::rest_api_port,
+    listen_port            => $api_port,
     haproxy_config_options => {
-      'option'         => ['httpchk /apidoc/explorer', 'httplog'],
+      'option'         => ['httpchk /index', 'httplog'],
       'timeout client' => '3h',
       'timeout server' => '3h',
       'balance'        => 'source',
