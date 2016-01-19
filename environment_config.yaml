@@ -51,6 +51,7 @@ attributes:
         - odl-vpnservice-impl-rest
         - odl-vpnservice-impl-ui
         - odl-vpnservice-core
+        - odl-vpnservice-openstack
   rest_api_port:
     value: '8282'
     label: 'Port number'
