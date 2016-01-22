@@ -3,7 +3,7 @@
   role: [opendaylight]
   requires: [deploy_start]
   required_for: [deploy_end, primary-controller, controller]
-  tasks: [fuel_pkgs, hiera, globals, tools, logging, odl-netconfig,
+  tasks: [hiera, setup_repositories, fuel_pkgs, globals, tools, logging, odl-netconfig,
         hosts, firewall, deploy_start, odl_install]
   parameters:
     strategy:
