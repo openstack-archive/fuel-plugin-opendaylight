@@ -4,6 +4,7 @@ module Puppet::Parser::Functions
   newfunction(:odl_hiera_overrides) do |args|
     filename = args[0]
     node_roles = args[1]
+    odl = function_hiera(['opendaylight'])
     hiera_overrides = {}
 
     # When L3 forward is disabled in ODL set external_network_bridge option
@@ -17,7 +18,17 @@ module Puppet::Parser::Functions
                   }
                 }
 
+    # When L3 forward is enabled in odl there is no neutron l3 agent
+    # which normally proxy request to metadata agent. Dhcp agent can
+    # takeover this task
+    dhcp_agent =  {'neutron_dhcp_agent_config' =>
+                    {'DEFAULT/force_metadata' =>
+                      {'value' => True}
+                    }
+                  }
+
     hiera_overrides['configuration'] = l3_agent
+    hiera_overrides['configuration'] = dhcp_agent if odl['enable_l3_odl']
     # override neutron_config/quantum_settings
     neutron_config = function_hiera(['neutron_config'])
     neutron_config['L2']['mechanism_drivers'] = 'opendaylight'
