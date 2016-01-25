@@ -63,10 +63,21 @@
   type: skipped
 - id: openstack-network-plugins-l2
   type: skipped
-- id: odl-network-plugins-l2
+- id: odl-primary-network-plugins-l2
   type: puppet
   version: 2.0.0
   groups: [primary-controller]
+  required_for: [openstack-network-end]
+  requires: [neutron-configuration, openstack-network-server-config]
+  refresh_on: [neutron_plugin_ml2, neutron_config, neutron_api_config]
+  parameters:
+    puppet_manifest: puppet/manifests/odl-ml2-configuration.pp
+    puppet_modules: puppet/modules:/etc/puppet/modules
+    timeout: 1800
+- id: odl-network-plugins-l2
+  type: puppet
+  version: 2.0.0
+  groups: [controller,compute]
   required_for: [openstack-network-end]
   requires: [neutron-configuration, openstack-network-server-config]
   refresh_on: [neutron_plugin_ml2, neutron_config, neutron_api_config]

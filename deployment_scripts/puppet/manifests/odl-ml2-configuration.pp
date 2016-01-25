@@ -1,9 +1,13 @@
 notice('MODULAR: odl-ml2.pp')
 
+include opendaylight
 $use_neutron = hiera('use_neutron', false)
 
 class neutron {}
 class { 'neutron' :}
+
+$address = hiera('management_vip')
+$port = $opendaylight::rest_api_port
 
 if $use_neutron {
   include ::neutron::params
@@ -15,10 +19,14 @@ if $use_neutron {
   $neutron_server_enable = pick($neutron_config['neutron_server_enable'], true)
   $neutron_nodes = hiera_hash('neutron_nodes')
 
-  $management_vip     = hiera('management_vip')
-  $service_endpoint   = hiera('service_endpoint', $management_vip)
+  $management_vip         = hiera('management_vip')
+  $service_endpoint       = hiera('service_endpoint', $management_vip)
+  $ssl_hash               = hiera_hash('use_ssl', {})
+  $internal_auth_protocol = get_ssl_property($ssl_hash, {}, 'keystone', 'internal', 'protocol', 'http')
+  $internal_auth_address  = get_ssl_property($ssl_hash, {}, 'keystone', 'internal', 'hostname', [$service_endpoint])
+
   $auth_api_version   = 'v2.0'
-  $identity_uri       = "http://${service_endpoint}:5000"
+  $identity_uri       = "${internal_auth_protocol}://${internal_auth_address}:5000"
   $auth_url           = "${identity_uri}/${auth_api_version}"
   $auth_password      = $neutron_config['keystone']['admin_password']
   $auth_user          = pick($neutron_config['keystone']['admin_user'], 'neutron')
@@ -26,14 +34,13 @@ if $use_neutron {
   $auth_region        = hiera('region', 'RegionOne')
   $auth_endpoint_type = 'internalURL'
 
-  $network_scheme = hiera_hash('network_scheme')
+  $network_scheme = hiera_hash('network_scheme', {})
   prepare_network_config($network_scheme)
 
   $neutron_advanced_config = hiera_hash('neutron_advanced_configuration', { })
   $l2_population     = try_get_value($neutron_advanced_config, 'neutron_l2_pop', false)
   $dvr               = try_get_value($neutron_advanced_config, 'neutron_dvr', false)
   $segmentation_type = try_get_value($neutron_config, 'L2/segmentation_type')
-  $extension_drivers = ['port_security']
 
   if $compute and ! $dvr {
     $do_floating = false
@@ -41,7 +48,7 @@ if $use_neutron {
     $do_floating = true
   }
 
-  $network_vlan_ranges = generate_physnet_vlan_ranges($neutron_config, $network_scheme, {
+  $bridge_mappings = generate_bridge_mappings($neutron_config, $network_scheme, {
     'do_floating' => $do_floating,
     'do_tenant'   => true,
     'do_provider' => false
@@ -50,14 +57,7 @@ if $use_neutron {
   if $segmentation_type == 'vlan' {
     $net_role_property    = 'neutron/private'
     $iface                = get_network_role_property($net_role_property, 'phys_dev')
-    $overlay_net_mtu      =  pick(get_transformation_property('mtu', $iface[0]), '1500')
     $enable_tunneling = false
-    $physical_network_mtus = generate_physnet_mtus($neutron_config, $network_scheme, {
-      'do_floating' => $do_floating,
-      'do_tenant'   => true,
-      'do_provider' => false
-    })
-    $tunnel_id_ranges = []
     $network_type = 'vlan'
     $tunnel_types = []
   } else {
@@ -66,11 +66,6 @@ if $use_neutron {
     $iface             = get_network_role_property($net_role_property, 'phys_dev')
     $physical_net_mtu  = pick(get_transformation_property('mtu', $iface[0]), '1500')
     $tunnel_id_ranges  = [try_get_value($neutron_config, 'L2/tunnel_id_ranges')]
-    $physical_network_mtus = generate_physnet_mtus($neutron_config, $network_scheme, {
-      'do_floating' => $do_floating,
-      'do_tenant'   => false,
-      'do_provider' => false
-    })
 
     if $segmentation_type == 'gre' {
       $mtu_offset = '42'
@@ -82,39 +77,21 @@ if $use_neutron {
     }
     $tunnel_types = [$network_type]
 
-    if $physical_net_mtu {
-      $overlay_net_mtu = $physical_net_mtu - $mtu_offset
-    } else {
-      $overlay_net_mtu = '1500' - $mtu_offset
-    }
-
     $enable_tunneling = true
   }
 
-  $type_drivers = ['local', 'flat', 'vlan', 'gre', 'vxlan']
-  $tenant_network_types  = ['flat', $network_type]
-  $default_mechanism_drivers = $l2_population ? { true => 'openvswitch,l2population', default => 'openvswitch'}
-  $mechanism_drivers = split(try_get_value($neutron_config, 'L2/mechanism_drivers', $default_mechanism_drivers), ',')
-  $flat_networks = ['*']
-  $vxlan_group = '224.0.0.1'
-
-  class { 'neutron::plugins::ml2':
-    type_drivers          => $type_drivers,
-    tenant_network_types  => $tenant_network_types,
-    mechanism_drivers     => $mechanism_drivers,
-    flat_networks         => $flat_networks,
-    network_vlan_ranges   => $network_vlan_ranges,
-    tunnel_id_ranges      => $tunnel_id_ranges,
-    vxlan_group           => $vxlan_group,
-    vni_ranges            => $tunnel_id_ranges,
-    physical_network_mtus => $physical_network_mtus,
-    path_mtu              => $overlay_net_mtu,
-    extension_drivers     => $extension_drivers,
+  neutron_plugin_ml2 {
+    'ml2/mechanism_drivers':      value => 'opendaylight';
+    'ml2_odl/password':           value => 'admin';
+    'ml2_odl/username':           value => 'admin';
+    'ml2_odl/url':                value => "http://${address}:${port}/controller/nb/v2/neutron";
   }
+
 
   # Synchronize database after plugin was configured
   if $primary_controller {
     include ::neutron::db::sync
+    Neutron_plugin_ml2<||> ~> Exec['neutron-db-sync']
   }
 
   if $node_name in keys($neutron_nodes) {
@@ -147,13 +124,6 @@ if $use_neutron {
       provider    => 'shell'
     }
 
-    $ha_agent = try_get_value($neutron_advanced_config, 'l2_agent_ha', true)
-    if $ha_agent {
-      #Exec<| title == 'waiting-for-neutron-api' |> ->
-      class { 'cluster::neutron::ovs' :
-        primary => $primary_controller,
-      }
-    }
   }
 
   # Stub for upstream neutron manifests
