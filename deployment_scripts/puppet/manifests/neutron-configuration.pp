@@ -2,8 +2,6 @@ notice('MODULAR: neutron-configuration.pp')
 
 include opendaylight
 $use_neutron = hiera('use_neutron', false)
-$address = hiera('management_vip')
-$port = $opendaylight::rest_api_port
 $odl = hiera('opendaylight')
 $nodes_hash = hiera('nodes', {})
 $roles = node_roles($nodes_hash, hiera('uid'))
@@ -13,13 +11,6 @@ if $use_neutron {
 
   package {'python-networking-odl':
     ensure => installed,
-  }
-
-  neutron_plugin_ml2 {
-    'ml2/mechanism_drivers':      value => 'opendaylight';
-    'ml2_odl/password':           value => 'admin';
-    'ml2_odl/username':           value => 'admin';
-    'ml2_odl/url':                value => "http://${address}:${port}/controller/nb/v2/neutron";
   }
 
 
@@ -52,7 +43,7 @@ if $use_neutron {
 
   $rabbit_hash      = hiera_hash('rabbit_hash', { })
   $ceilometer_hash  = hiera_hash('ceilometer', { })
-  $network_scheme   = hiera('network_scheme')
+  $network_scheme   = hiera_hash('network_scheme')
 
   $verbose      = pick($openstack_network_hash['verbose'], hiera('verbose', true))
   $debug        = pick($openstack_network_hash['debug'], hiera('debug', true))
