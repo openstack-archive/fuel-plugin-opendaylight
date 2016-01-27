@@ -6,4 +6,4 @@ opendaylight:
   weight: 150                       # weight that will be used for ordering on fuel ui
   limits:
     max: 1
-    min: 1
+    min: 0

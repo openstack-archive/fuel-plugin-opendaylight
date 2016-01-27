@@ -17,6 +17,11 @@ attributes:
     type: "checkbox"
     value: false
     label: "SFC features"
+  use_external_odl:
+    weight: 13
+    type: "checkbox"
+    value: false
+    label: "Use external odl"
   metadata:
     restrictions:
       - "cluster:net_provider != 'neutron'": "Only neutron is supported by OpenDaylight"
@@ -61,3 +66,12 @@ attributes:
     regex:
       source: ^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$
       error: 'Invalid port number'
+  rest_api_ip:
+    value: '127.0.0.1'
+    label: 'IP'
+    description: 'This is only read when external odl is used. IP on which external ODL REST API will be available.'
+    weight: 40
+    type: "text"
+    regex:
+      source: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+      error: 'Invalid ip number'
