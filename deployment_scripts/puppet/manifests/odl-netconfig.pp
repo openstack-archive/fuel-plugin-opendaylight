@@ -25,11 +25,6 @@ notify {'SDN': message => $sdn }
 sysctl::value { 'net.ipv4.conf.all.arp_accept':   value => '1'  }
 sysctl::value { 'net.ipv4.conf.default.arp_accept':   value => '1'  }
 
-#Disable rp_filter
-sysctl::value { 'net.ipv4.conf.all.rp_filter':   value => '0'  }
-sysctl::value { 'net.ipv4.conf.default.rp_filter':   value => '0'  }
-
-
 # setting kernel reserved ports
 # defaults are 49000,49001,35357,41055,41056,58882
 class { 'openstack::reserved_ports': }
@@ -98,17 +93,21 @@ exec { 'wait-for-interfaces':
   command => 'sleep 32',
 }
 
-# check that network was configured successfully
-# and the default gateway is online
-$default_gateway = hiera('default_gateway')
+$run_ping_checker = hiera('run_ping_checker', true)
 
-ping_host { $default_gateway :
-  ensure => 'up',
+if $run_ping_checker {
+    # check that network was configured successfully
+    # and the default gateway is online
+    $default_gateway = hiera('default_gateway')
+
+    ping_host { $default_gateway :
+        ensure => 'up',
+    }
+    L2_port<||> -> Ping_host[$default_gateway]
+    L2_bond<||> -> Ping_host[$default_gateway]
+    L3_ifconfig<||> -> Ping_host[$default_gateway]
+    L3_route<||> -> Ping_host[$default_gateway]
 }
-L2_port<||> -> Ping_host[$default_gateway]
-L2_bond<||> -> Ping_host[$default_gateway]
-L3_ifconfig<||> -> Ping_host[$default_gateway]
-L3_route<||> -> Ping_host[$default_gateway]
 
 Class['l23network'] ->
 Exec['wait-for-interfaces']

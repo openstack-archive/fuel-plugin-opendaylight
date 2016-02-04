@@ -5,8 +5,17 @@ module Puppet::Parser::Functions
     filename = args[0]
     node_roles = args[1]
     odl = function_hiera(['opendaylight'])
+    management_vip = function_hiera(['management_vip'])
     hiera_overrides = {}
     configuration = {}
+
+    ml2_plugin = {'neutron_plugin_ml2' =>
+                   {'ml2/mechanism_drivers' => {'value' => 'opendaylight'},
+                   'ml2_odl/password' => {'value' => 'admin'},
+                   'ml2_odl/username' => {'value' => 'admin'},
+                   'ml2_odl/url' => {'value' => "http://#{management_vip}:#{odl['rest_api_port']}/controller/nb/v2/neutron"}
+                   }
+                 }
 
     # When L3 forward is disabled in ODL set external_network_bridge option
     # to use neutron L3 agent to create qg port on selected bridge
@@ -28,6 +37,7 @@ module Puppet::Parser::Functions
                     }
                   }
 
+    configuration.merge! ml2_plugin
     configuration.merge! l3_agent
     configuration.merge! dhcp_agent if odl['enable_l3_odl']
     hiera_overrides['configuration'] = configuration

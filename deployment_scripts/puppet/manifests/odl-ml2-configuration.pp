@@ -1,13 +1,10 @@
 notice('MODULAR: odl-ml2.pp')
 
-include opendaylight
 $use_neutron = hiera('use_neutron', false)
+$compute     = roles_include('compute')
 
 class neutron {}
 class { 'neutron' :}
-
-$address = hiera('management_vip')
-$port = $opendaylight::rest_api_port
 
 if $use_neutron {
   include ::neutron::params
@@ -34,64 +31,10 @@ if $use_neutron {
   $auth_region        = hiera('region', 'RegionOne')
   $auth_endpoint_type = 'internalURL'
 
-  $network_scheme = hiera_hash('network_scheme', {})
-  prepare_network_config($network_scheme)
-
-  $neutron_advanced_config = hiera_hash('neutron_advanced_configuration', { })
-  $l2_population     = try_get_value($neutron_advanced_config, 'neutron_l2_pop', false)
-  $dvr               = try_get_value($neutron_advanced_config, 'neutron_dvr', false)
-  $segmentation_type = try_get_value($neutron_config, 'L2/segmentation_type')
-
-  if $compute and ! $dvr {
-    $do_floating = false
-  } else {
-    $do_floating = true
-  }
-
-  $bridge_mappings = generate_bridge_mappings($neutron_config, $network_scheme, {
-    'do_floating' => $do_floating,
-    'do_tenant'   => true,
-    'do_provider' => false
-  })
-
-  if $segmentation_type == 'vlan' {
-    $net_role_property    = 'neutron/private'
-    $iface                = get_network_role_property($net_role_property, 'phys_dev')
-    $enable_tunneling = false
-    $network_type = 'vlan'
-    $tunnel_types = []
-  } else {
-    $net_role_property = 'neutron/mesh'
-    $tunneling_ip      = get_network_role_property($net_role_property, 'ipaddr')
-    $iface             = get_network_role_property($net_role_property, 'phys_dev')
-    $physical_net_mtu  = pick(get_transformation_property('mtu', $iface[0]), '1500')
-    $tunnel_id_ranges  = [try_get_value($neutron_config, 'L2/tunnel_id_ranges')]
-
-    if $segmentation_type == 'gre' {
-      $mtu_offset = '42'
-      $network_type = 'gre'
-    } else {
-      # vxlan is the default segmentation type for non-vlan cases
-      $mtu_offset = '50'
-      $network_type = 'vxlan'
-    }
-    $tunnel_types = [$network_type]
-
-    $enable_tunneling = true
-  }
-
-  neutron_plugin_ml2 {
-    'ml2/mechanism_drivers':      value => 'opendaylight';
-    'ml2_odl/password':           value => 'admin';
-    'ml2_odl/username':           value => 'admin';
-    'ml2_odl/url':                value => "http://${address}:${port}/controller/nb/v2/neutron";
-  }
-
-
   # Synchronize database after plugin was configured
   if $primary_controller {
     include ::neutron::db::sync
-    Neutron_plugin_ml2<||> ~> Exec['neutron-db-sync']
+    notify{"Trigger neutron-db-sync": } ~> Exec['neutron-db-sync']
   }
 
   if $node_name in keys($neutron_nodes) {
@@ -130,15 +73,6 @@ if $use_neutron {
   package { 'neutron':
     name   => 'binutils',
     ensure => 'installed',
-  }
-
-  # override neutron options
-  $override_configuration = hiera_hash('configuration', {})
-  override_resources { 'neutron_plugin_ml2':
-    data => $override_configuration['neutron_plugin_ml2']
-  }
-  override_resources { 'neutron_agent_ovs':
-    data => $override_configuration['neutron_agent_ovs']
   }
 
 }
