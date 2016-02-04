@@ -7,7 +7,7 @@ set -eux
 
 # Where we can find odl karaf distribution tarball
 # can be http(s) url or absolute path
-ODL_TARBALL_LOCATION=${ODL_TARBALL_LOCATION:-https://nexus.opendaylight.org/content/repositories/autorelease-1044/org/opendaylight/integration/distribution-karaf/0.4.0-beryllium-daily-v201601270140/distribution-karaf-0.4.0-beryllium-daily-v201601270140.tar.gz}
+ODL_TARBALL_LOCATION=${ODL_TARBALL_LOCATION:-https://nexus.opendaylight.org/content/repositories/staging/org/opendaylight/integration/distribution-karaf/0.4.0-Beryllium-RC1/distribution-karaf-0.4.0-Beryllium-RC1.tar.gz}
 
 #Verion number used in deb/rpm package
 ODL_VERSION_NUMBER=${ODL_VERSION_NUMBER:-0.4.0}
