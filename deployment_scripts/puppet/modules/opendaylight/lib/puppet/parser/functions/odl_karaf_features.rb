@@ -9,6 +9,7 @@ module Puppet::Parser::Functions
     enabled_features << features_set['ovs']
     enabled_features << features_set['sfc'] if odl_settings['enable_sfc']
     enabled_features << features_set['gbp'] if odl_settings['enable_gbp']
+    enabled_features << features_set['java8'] if odl_settings['enable_java8']
     enabled_features << features_set['vpn'] if bgpvpn
 
     enabled_features.join(',')

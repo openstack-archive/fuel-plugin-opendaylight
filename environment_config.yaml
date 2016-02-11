@@ -1,4 +1,9 @@
 attributes:
+  enable_java8:
+    weight: 14
+    type: "checkbox"
+    value: false
+    label: "Enable JAVA 8"
   enable_gbp:
     weight: 14
     type: "checkbox"

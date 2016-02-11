@@ -18,7 +18,11 @@ class opendaylight::install (
 
   $java_package = $operatingsystem ? {
     'CentOS' => 'java-1.7.0-openjdk',
-    'Ubuntu' => 'openjdk-7-jre-headless',
+    if $odl['enable_java8'] {
+      'Ubuntu' => 'openjdk-8-jre-headless'
+    } else {
+      'Ubuntu' => 'openjdk-7-jre-headless'
+    },
   }
 
   package { 'java-jre':
