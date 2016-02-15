@@ -1,0 +1,8 @@
+Code-Review+2: Michal Skalski <mskalski@mirantis.com>
+Workflow+1: Michal Skalski <mskalski@mirantis.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Mon, 15 Feb 2016 16:37:55 +0000
+Reviewed-on: https://review.openstack.org/280313
+Project: openstack/fuel-plugin-opendaylight
+Branch: refs/heads/brahmaputra-release
