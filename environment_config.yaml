@@ -30,7 +30,7 @@ attributes:
         - ssh
         - management
       gbp:
-        - odl-groupbasedpolicy-base
+        - odl-groupbasedpolicy-neutronmapper
         - odl-groupbasedpolicy-ofoverlay
       ovs:
         - odl-ovsdb-openstack
@@ -38,13 +38,14 @@ attributes:
         - odl-aaa-authn
         - odl-dlux-all
       sfc:
-        - odl-sfc-core
+        - odl-sfc-model
+        - odl-sfc-provider
+        - odl-sfc-provider-rest
         - odl-sfc-sb-rest
         - odl-sfc-ui
         - odl-sfc-netconf
         - odl-sfc-ovs
         - odl-sfcofl2
-        - odl-sfc-test-consumer
       vpn:
         - odl-vpnservice-api
         - odl-vpnservice-impl
