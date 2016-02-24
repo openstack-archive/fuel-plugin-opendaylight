@@ -77,6 +77,10 @@ function download_dependencies {
   fi
 }
 
+function download_ovs_dependencies {
+  wget -N -i "${DIR}/odl_package/${1}/ovs_2_4_dependencies.txt"
+}
+
 function build_pkg {
   case $1 in
     centos)
@@ -90,6 +94,7 @@ function build_pkg {
       fpm --force -s dir -t deb -m 'mskalski@mirantis.com' --version "${ODL_VERSION_NUMBER}" --description "${ODL_DESCRIPTION}" --prefix /opt/opendaylight --deb-upstart "${DIR}/odl_package/${1}/opendaylight" --after-install "${DIR}/odl_package/${1}/opendaylight-post" --name opendaylight -d "${JAVA_VERSION}" -C "${TMP_DIR}/opendaylight_src"
       fpm --force -s python -t deb -m 'mskalski@mirantis.com' --python-install-lib /usr/lib/python2.7/dist-packages ${TMP_DIR}/networking_odl/setup.py
       download_dependencies ${1}
+      download_ovs_dependencies ${1}
       popd
       add_opnfv_quagga "${DIR}/repositories/${1}/"
       ;;
@@ -128,4 +133,4 @@ do
   build_pkg $system
 done
 
-cleanup
+#cleanup

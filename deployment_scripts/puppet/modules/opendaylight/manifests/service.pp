@@ -7,9 +7,14 @@ class opendaylight::service {
 
   include opendaylight::ha::haproxy
 
+  if odl['enable_bgpvpn'] {
+    $odl_up_testing_site = "ovsdb:1"
+  } else {
+    $odl_up_testing_site = "netvirt:1"
+  }
   if member($roles, 'primary-controller') {
     exec { 'wait-until-odl-ready':
-      command   => "curl -o /dev/null --fail --silent --head -u admin:admin http://${management_vip}:${rest_port}/restconf/operational/network-topology:network-topology/topology/netvirt:1",
+      command   => "curl -o /dev/null --fail --silent --head -u admin:admin http://${management_vip}:${rest_port}/restconf/operational/network-topology:network-topology/topology/${odl_up_testing_site}",
       path      => '/bin:/usr/bin',
       tries     => 60,
       try_sleep => 20,

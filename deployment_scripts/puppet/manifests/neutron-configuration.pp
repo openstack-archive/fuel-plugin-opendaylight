@@ -88,18 +88,38 @@ if $use_neutron {
     $net_role_property = 'neutron/mesh'
     $iface             = get_network_role_property($net_role_property, 'phys_dev')
     $tunneling_ip      = get_network_role_property($net_role_property, 'ipaddr')
+    $odl_settings = hiera('opendaylight')
 
-    if $ext_interface {
-      exec { 'ovs-set-provider-mapping':
-        command => "ovs-vsctl set Open_vSwitch $(ovs-vsctl show | head -n 1) other_config:provider_mappings=br-ex:${ext_interface}",
-        path    => '/usr/bin',
-        require => Exec['ovs-set-manager'],
+    # With bgpvpn feature enabled the connectivity to the outside world
+    # is solved in another way.
+    unless odl_settings['enable_bgpvpn'] {
+      if $ext_interface {
+        exec { 'ovs-set-provider-mapping':
+          command => "ovs-vsctl set Open_vSwitch $(ovs-vsctl show | head -n 1) other_config:provider_mappings=br-ex:${ext_interface}",
+          path    => '/usr/bin',
+          require => Exec['ovs-set-manager'],
+        }
       }
     }
     exec { 'ovs-set-tunnel-endpoint':
       command => "ovs-vsctl set Open_vSwitch $(ovs-vsctl show | head -n 1) other_config:local_ip=${tunneling_ip}",
       path    => '/usr/bin',
       require => Exec['ovs-set-manager'],
+    }
+
+    # Setup the trunk end points. when the sdnvpn feature is activated this is needed.
+    if odl_settings['enable_bgpvpn'] {
+      $file_setupTEPs = '/tmp/setup_TEPs.py'
+      file { $file_setupTEPs:
+          ensure => file,
+          content => template('opendaylight/setup_TEPs.py'),
+      }
+ 
+      exec { 'setup_TEPs':
+        command => "python $file_setupTEPs ${opendaylight::manager_ip_address} ${tunneling_ip}",
+        require => File[$file_setupTEPs],
+        path => '/usr/local/bin:/usr/bin:/sbin:/bin:/usr/local/sbin:/usr/sbin',
+      }
     }
 
     $physical_net_mtu  = pick(get_transformation_property('mtu', $iface[0]), '1500')
