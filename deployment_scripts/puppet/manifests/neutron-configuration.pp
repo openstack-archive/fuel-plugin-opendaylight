@@ -3,9 +3,6 @@ notice('MODULAR: neutron-configuration.pp')
 include opendaylight
 $use_neutron = hiera('use_neutron', false)
 $odl = hiera('opendaylight')
-$nodes_hash = hiera('nodes', {})
-$roles = node_roles($nodes_hash, hiera('uid'))
-
 
 if $use_neutron {
 
@@ -19,7 +16,7 @@ if $use_neutron {
     path    => '/usr/bin'
   }
 
-  if $odl['enable_l3_odl'] or member($roles, 'primary-controller') or member($roles, 'controller') {
+  if $odl['enable_l3_odl'] or roles_include(['primary-controller', 'controller']) {
     $patch_jacks_names = get_pair_of_jack_names(['br-ex', 'br-ex-lnx'])
     $ext_interface = $patch_jacks_names[0]
   }
