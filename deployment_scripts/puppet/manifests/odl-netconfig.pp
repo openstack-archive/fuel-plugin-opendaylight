@@ -1,7 +1,6 @@
 notice('MODULAR: odl-netconfig.pp')
 
-$nodes_hash = hiera('nodes', {})
-$roles = node_roles($nodes_hash, hiera('uid'))
+$roles = hiera('roles')
 
 $network_scheme = odl_network_scheme($roles)
 

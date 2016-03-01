@@ -17,18 +17,15 @@ class opendaylight::ha::haproxy {
 
   $public_vip = hiera('public_vip')
   $management_vip = hiera('management_vip')
-  $nodes_hash = hiera('nodes')
   $odl = hiera('opendaylight')
   $api_port = $odl['rest_api_port']
-  $primary_controller_nodes = filter_nodes($nodes_hash,'role','primary-controller')
-  $odl_controllers = filter_nodes($nodes_hash,'role','opendaylight')
 
   # defaults for any haproxy_service within this class
   Openstack::Ha::Haproxy_service {
       internal_virtual_ip => $management_vip,
-      ipaddresses         => filter_hash($odl_controllers, 'internal_address'),
+      ipaddresses         => $opendaylight::odl_mgmt_ips,
       public_virtual_ip   => $public_vip,
-      server_names        => filter_hash($odl_controllers, 'name'),
+      server_names        => $opendaylight::odl_nodes_names,
       public              => true,
       internal            => true,
   }

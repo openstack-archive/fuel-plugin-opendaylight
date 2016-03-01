@@ -1,7 +1,6 @@
 class opendaylight::hiera_override {
   $override_file = '/etc/hiera/override/opendaylight.yaml'
-  $nodes_hash = hiera('nodes', {})
-  $roles = node_roles($nodes_hash, hiera('uid'))
+  $roles = hiera('roles')
   odl_hiera_overrides($override_file, $roles)
 
   file_line {'opendaylight_hiera_override':

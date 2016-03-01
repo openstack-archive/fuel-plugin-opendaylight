@@ -3,8 +3,6 @@ class opendaylight::install (
   $bind_address = undef,
 ) {
 
-  $nodes_hash = hiera('nodes', {})
-  $roles = node_roles($nodes_hash, hiera('uid'))
   $management_vip = hiera('management_vip')
   $odl = hiera('opendaylight')
   $conf_dir = '/opt/opendaylight/etc'

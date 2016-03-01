@@ -12,7 +12,7 @@
   type: puppet
   groups: [opendaylight]
   requires: [deploy_start]
-  required_for: [openstack-network-start, odl_configure]
+  required_for: [openstack-network-start, odl_configure, cluster-haproxy]
   requires: [hosts, firewall, globals]
   parameters:
     puppet_manifest: puppet/manifests/odl-install.pp

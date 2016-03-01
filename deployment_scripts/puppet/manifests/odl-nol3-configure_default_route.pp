@@ -1,8 +1,7 @@
 notice('MODULAR: configure_default_route.pp')
 
 
-$nodes_hash             = hiera('nodes', {})
-$roles                  = node_roles($nodes_hash, hiera('uid'))
+$roles                  = hiera('roles')
 $network_scheme         = odl_network_scheme($roles)
 $management_vrouter_vip = hiera('management_vrouter_vip')
 $management_role        = 'management'
