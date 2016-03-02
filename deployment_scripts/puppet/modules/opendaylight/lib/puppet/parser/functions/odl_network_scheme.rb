@@ -47,14 +47,6 @@ module Puppet::Parser::Functions
        endpoints['br-aux'] = endpoints.delete 'br-prv'
     end
 
-    if node_roles.include?('compute') and odl['enable_l3_odl']
-      if endpoints.has_key? 'br-ex-lnx'
-        debug 'ODL: not use br-ex-lnx as gateway on compute node'
-        endpoints['br-ex-lnx'].delete('gateway')
-        endpoints['br-ex-lnx']['IP'] = 'none'
-        endpoints['br-mgmt']['gateway']  = management_vrouter_vip
-      end
-    end
     debug "ODL network after transformation: #{network_scheme}"
     network_scheme
   end
