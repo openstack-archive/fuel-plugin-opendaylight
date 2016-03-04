@@ -17,6 +17,35 @@ attributes:
     type: "checkbox"
     value: false
     label: "SFC features"
+  enable_bgpvpn:
+    weight: 13
+    type: "checkbox"
+    value: false
+    label: "BGPVPN extensions"
+    description:
+      >
+        This enables the bgpvpn extension of neutron togethere with the
+        corresponding sdnvpn features in odl. This feature will disable
+        the standart ovsdb feature from ODL.
+    restrictions:
+      - condition: "settings:bgpvpn == null or settings:bgpvpn.metadata.enabled == false"
+        strict: false
+        message: "BGPVPN (fuel-plugin-bgpvpn) plugin must be installed and enabled."
+      - networking_parameters:segmentation_type == 'vlan': This feature works only with segmentation_type != vlan
+      - condition: "settings:fuel-plugin-ovs == null or settings:fuel-plugin-ovs.metadata.enabled == false"
+        strict: false
+        message: "Openvswitch with NSH support (fuel-plugin-ovs) must be installed and enabled."
+  bgpvpn_gateway:
+    weight: 13
+    type: "text"
+    value: "0.0.0.0"
+    description: "Define the default gateway for BGPVPN"
+    label: "Default Gateway"
+    restrictions:
+        - settings:opendaylight.enable_bgpvpn.value == false: Only needed if BGPVPN is enabled.
+    regex:
+      source: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+      error: 'Invalid ip number'
   metadata:
     restrictions:
       - "cluster:net_provider != 'neutron'": "Only neutron is supported by OpenDaylight"
@@ -29,14 +58,15 @@ attributes:
         - kar
         - ssh
         - management
+      odl-default:
+        - odl-restconf-all
+        - odl-aaa-authn
+        - odl-dlux-all
       gbp:
         - odl-groupbasedpolicy-neutronmapper
         - odl-groupbasedpolicy-ofoverlay
       ovs:
         - odl-ovsdb-openstack
-        - odl-restconf-all
-        - odl-aaa-authn
-        - odl-dlux-all
       sfc:
         - odl-sfc-model
         - odl-sfc-provider
@@ -47,11 +77,6 @@ attributes:
         - odl-sfc-ovs
         - odl-sfcofl2
       vpn:
-        - odl-vpnservice-api
-        - odl-vpnservice-impl
-        - odl-vpnservice-impl-rest
-        - odl-vpnservice-impl-ui
-        - odl-vpnservice-core
         - odl-vpnservice-openstack
   rest_api_port:
     value: '8282'
