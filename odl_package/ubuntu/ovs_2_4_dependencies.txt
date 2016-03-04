@@ -1,0 +1,4 @@
+http://ubuntu-cloud.archive.canonical.com/ubuntu/pool/main/o/openvswitch/openvswitch-common_2.4.0-0ubuntu4~cloud0_amd64.deb
+http://ubuntu-cloud.archive.canonical.com/ubuntu/pool/main/o/openvswitch/openvswitch-dbg_2.4.0-0ubuntu4~cloud0_amd64.deb
+http://ubuntu-cloud.archive.canonical.com/ubuntu/pool/main/o/openvswitch/openvswitch-switch_2.4.0-0ubuntu4~cloud0_amd64.deb
+http://de.archive.ubuntu.com/ubuntu/pool/universe/o/openvswitch/openvswitch-datapath-dkms_2.0.2-0ubuntu0.14.04.3_all.deb
