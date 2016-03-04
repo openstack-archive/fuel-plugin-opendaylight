@@ -45,7 +45,11 @@ module Puppet::Parser::Functions
     # override neutron_config/quantum_settings
     neutron_config = function_hiera(['neutron_config'])
     neutron_config['L2']['mechanism_drivers'] = 'opendaylight'
-    neutron_config['L2']['phys_nets']['physnet1']['bridge'] = 'br-ex'
+    if odl['enable_bgpvpn']
+      neutron_config['L2']['phys_nets']['physnet1']['bridge'] = 'br-ex'
+    else
+      neutron_config['L2']['phys_nets']['physnet1']['bridge'] = 'br-int'
+    end
     hiera_overrides['neutron_config'] = neutron_config
     hiera_overrides['quantum_settings'] = neutron_config
 
