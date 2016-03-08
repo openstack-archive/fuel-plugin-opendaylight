@@ -7,7 +7,7 @@ version: '0.8.0'
 # Description
 description: 'This plugin provides OpenDaylight as a backend for neutron.
 Use the same IP address as for OpenStack Horizon and port 8181 to reach dlux web ui.
-  DLUX: http://<HORIZON_IP>:8181/index.html' 
+  DLUX: http://<HORIZON_IP>:8181/index.html'
 # Required fuel version
 fuel_version: ['8.0']
 # Specify license of your plugin
