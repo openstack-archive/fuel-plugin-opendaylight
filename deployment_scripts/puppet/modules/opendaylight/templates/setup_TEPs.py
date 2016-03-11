@@ -13,6 +13,8 @@ import yaml
 import sys
 import logging
 import datetime
+import urllib
+import traceback
 
 try:
     from neutron.openstack.common import jsonutils
@@ -114,6 +116,7 @@ class ODL_Client(object):
     def add_tunnel_endpoint_post(self, tzn, prefix, dpnid, port, ip, gateway):
         vteps = []
         urlPath = 'itm:transport-zones'
+        transport_zone_available = True
         try:
             response = self.sendjson('GET', urlPath)
             tz = response['transport-zones']
@@ -123,6 +126,7 @@ class ODL_Client(object):
             vlanid = 0
             tz = self.create_transport_zone(tzn, tunnel_typ, prefix, vlanid,
                                             gateway)
+            transport_zone_available = False
         subnet = tz['transport-zone'][0]['subnets'][0]
         if 'vteps' in subnet:
             vteps = subnet['vteps']
@@ -131,7 +135,7 @@ class ODL_Client(object):
         for i_vtep in vteps:
             if i_vtep['ip-address'] == ip and not i_vtep['dpn-id'] == dpnid:
                 LOG.error("Local_ip already in use %s of DPN %s" %
-                      (ip, i_vtep['dpn-id']))
+                          (ip, i_vtep['dpn-id']))
                 sys.exit(11)
             if i_vtep == vtep:
                 already_included = True
@@ -140,17 +144,16 @@ class ODL_Client(object):
             return
         vteps.append(vtep)
         tz['transport-zone'][0]['subnets'][0]['vteps'] = vteps
-
-        # There is a bug in ODL that a put does not update the tunel
-        # endpoints. So we need to delete it and post it again.
-        # If new blades are added into an running env that could break
-        # the other end points
-        # https://bugs.opendaylight.org/show_bug.cgi?id=5422
-        try:
-            self.sendjson('DELETE', urlPath)
-        except Exception:
-            pass
-        self.sendjson('POST', urlPath, tz)
+        if transport_zone_available:
+            prefixUrl = urllib.quote(prefix, safe='')
+            urlPath = ('itm:transport-zones/transport-zone/'
+                       '%(tzn)s/subnets/%(prefixUrl)s/'
+                       % {'tzn': tzn,
+                          'prefixUrl': prefixUrl})
+            self.sendjson('PUT', urlPath,
+                          {'subnets': tz['transport-zone'][0]['subnets']})
+        else:
+            self.sendjson('POST', urlPath, tz)
 
 # HELPER function
 @log_enter_exit
@@ -185,6 +188,10 @@ class ovs_client():
         self.ovs_vsctl(['set-controller', br, 'tcp:'+odl_ctrl_ip+':'+of_port])
 
     @log_enter_exit
+    def set_manager(self, ovsdb_managers):
+        self.ovs_vsctl(['set-manager'] + ovsdb_managers)
+
+    @log_enter_exit
     def get_dpid(self, brname):
         dpId = -1
         result = self.ovs_vsctl(['get', 'Bridge', brname, 'datapath_id'])
@@ -199,11 +206,15 @@ def main():
     if os.path.isfile(Astute_path):
         with open(Astute_path, 'r') as f:
             ASTUTE = yaml.load(f)
-    if len(sys.argv) < 3:
-        print("usage: %s <odl_ctrl_ip> <local_ip>" % sys.argv[0])
+    if len(sys.argv) < 4:
+        print("usage: %s <odl_ctrl_ip> <local_ip> <ovsdb_managers>"
+              % sys.argv[0])
         sys.exit(10)
     odl_ctrl_ip = sys.argv[1]
     local_ip = sys.argv[2]
+    ovsdb_managers = []
+    for x in range(3, len(sys.argv)):
+        ovsdb_managers.append(sys.argv[x])
     local_port = 'phy0'
     of_port = '6633'
 
@@ -226,9 +237,17 @@ def main():
     # There is only one transport zone at the moment
     odlc.add_tunnel_endpoint_post('TZA', prefix, dpid, local_port,
                                   local_ip, gateway)
+    ovsc.set_manager(ovsdb_managers)
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as ex:
+        LOG.error(ex.message)
+        LOG.error(traceback.format_exc())
+        LOG.error("For more logs check: %(log_path)s"
+                  % {'log_path': LOG_PATH})
+        sys.exit(1)
 
 

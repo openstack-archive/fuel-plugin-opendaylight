@@ -4,6 +4,7 @@ include opendaylight
 $use_neutron = hiera('use_neutron', false)
 $odl = hiera('opendaylight')
 $management_vip = hiera('management_vip')
+$odl_settings = hiera('opendaylight')
 
 if $use_neutron {
 
@@ -11,10 +12,12 @@ if $use_neutron {
     ensure => installed,
   }
 
-  $ovsdb_managers = odl_ovsdb_managers($opendaylight::odl_mgmt_ips)
-  exec { 'ovs-set-manager':
-    command => "ovs-vsctl set-manager $ovsdb_managers",
-    path    => '/usr/bin'
+  unless $odl_settings['enable_bgpvpn'] {
+    $ovsdb_managers = odl_ovsdb_managers($opendaylight::odl_mgmt_ips)
+    exec { 'ovs-set-manager':
+      command => "ovs-vsctl set-manager $ovsdb_managers",
+      path    => '/usr/bin'
+    }
   }
 
   if $odl['enable_l3_odl'] or roles_include(['primary-controller', 'controller']) {
@@ -86,7 +89,6 @@ if $use_neutron {
     $net_role_property = 'neutron/mesh'
     $iface             = get_network_role_property($net_role_property, 'phys_dev')
     $tunneling_ip      = get_network_role_property($net_role_property, 'ipaddr')
-    $odl_settings = hiera('opendaylight')
 
     # With bgpvpn feature enabled the connectivity to the outside world
     # is solved in another way.
@@ -98,11 +100,11 @@ if $use_neutron {
           require => Exec['ovs-set-manager'],
         }
       }
-    }
-    exec { 'ovs-set-tunnel-endpoint':
-      command => "ovs-vsctl set Open_vSwitch $(ovs-vsctl show | head -n 1) other_config:local_ip=${tunneling_ip}",
-      path    => '/usr/bin',
-      require => Exec['ovs-set-manager'],
+      exec { 'ovs-set-tunnel-endpoint':
+        command => "ovs-vsctl set Open_vSwitch $(ovs-vsctl show | head -n 1) other_config:local_ip=${tunneling_ip}",
+        path    => '/usr/bin',
+        require => Exec['ovs-set-manager'],
+      }
     }
 
     # Setup the trunk end points. when the sdnvpn feature is activated this is needed.
@@ -112,10 +114,10 @@ if $use_neutron {
           ensure => file,
           content => template('opendaylight/setup_TEPs.py'),
       }
-
+      $ovsdb_managers = odl_ovsdb_managers($opendaylight::odl_mgmt_ips)
       exec { 'setup_TEPs':
         # At the moment the connection between ovs and ODL is no HA if vpnfeature is activated
-        command => "python $file_setupTEPs ${opendaylight::odl_mgmt_ips[0]} ${tunneling_ip}",
+        command => "python $file_setupTEPs ${opendaylight::odl_mgmt_ips[0]} ${tunneling_ip} $ovsdb_managers",
         require => File[$file_setupTEPs],
         path => '/usr/local/bin:/usr/bin:/sbin:/bin:/usr/local/sbin:/usr/sbin',
       }
