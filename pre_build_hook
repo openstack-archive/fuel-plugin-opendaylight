@@ -128,4 +128,6 @@ do
   build_pkg $system
 done
 
-cleanup
+if [ "$CLEANUP" != false ];then
+  cleanup
+fi
