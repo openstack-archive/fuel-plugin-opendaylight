@@ -20,6 +20,12 @@ class opendaylight::install (
     ensure  => $odl_package,
   }
 
+  if ($::osfamily == 'Debian' and $::opendaylight::arch == 'arm64') {
+    class { 'opendaylight::leveldbjni':
+      require => Package['opendaylight'],
+    }
+  }
+
   #Temporary solution until number of allowed open files
   #will be fixed in main systemd service file
   file {'/etc/systemd/system/opendaylight.service.d':
@@ -48,7 +54,8 @@ class opendaylight::install (
 
   debug("Set odl rest api port to ${rest_port}")
 
-  file { "${conf_dir}/jetty.xml":
+  file { 'jetty.xml':
+    path    => "${conf_dir}/jetty.xml",
     ensure  => file,
     owner   => 'odl',
     content => template('opendaylight/jetty.xml.erb')
@@ -88,6 +95,7 @@ class opendaylight::install (
   Package['opendaylight'] ->
   Ini_setting <||> ->
   Firewall <||> ->
-  File <||> ~>
+  File['jetty.xml'] ~>
+  Class['opendaylight::leveldbjni'] ~>
   Service['opendaylight']
 }

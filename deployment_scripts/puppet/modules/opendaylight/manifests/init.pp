@@ -9,4 +9,12 @@ class opendaylight {
   $odl_mgmt_ips = values($odl_mgmt_ips_hash)
   $odl_nodes_names = keys($odl_mgmt_ips_hash)
   $node_internal_address = $odl_mgmt_ips_hash["node-${node_uid}"]
+
+  $arch = $::architecture ? {
+    'aarch64' => $::osfamily ? {
+      'Debian' => 'arm64',
+      default  => 'aarch64',
+    },
+    default => $::architecture,
+  }
 }
