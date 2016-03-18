@@ -30,6 +30,9 @@ DIR="$(dirname `readlink -f $0`)"
 TMP_DIR="${DIR}/tmp"
 MODULES="${DIR}/deployment_scripts/puppet/modules"
 
+#Remove temporary files
+CLEANUP=${CLEANUP:-true}
+
 # If true openjdk-8 will be used
 USE_JAVA8=${USE_JAVA8:-false}
 if [ "$USE_JAVA8" = true ]
