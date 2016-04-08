@@ -80,6 +80,12 @@ function download_dependencies {
   fi
 }
 
+function patch_odl {
+  cp "${DIR}/odl_package/odl_beryllium_sr1_patch/dhcpservice-impl-0.2.1-Beryllium-SR1.jar" "${TMP_DIR}/opendaylight_src/system/org/opendaylight/vpnservice/dhcpservice-impl/0.2.1-Beryllium-SR1/dhcpservice-impl-0.2.1-Beryllium-SR1.jar"
+  cp "${DIR}/odl_package/odl_beryllium_sr1_patch/neutronvpn-api-0.2.1-Beryllium-SR1.jar" "${TMP_DIR}/opendaylight_src/system/org/opendaylight/vpnservice/neutronvpn-api/0.2.1-Beryllium-SR1/neutronvpn-api-0.2.1-Beryllium-SR1.jar"
+  cp "${DIR}/odl_package/odl_beryllium_sr1_patch/neutronvpn-impl-0.2.1-Beryllium-SR1.jar" "${TMP_DIR}/opendaylight_src/system/org/opendaylight/vpnservice/neutronvpn-impl/0.2.1-Beryllium-SR1/neutronvpn-impl-0.2.1-Beryllium-SR1.jar"
+}
+
 function build_pkg {
   case $1 in
     centos)
@@ -120,6 +126,7 @@ then
 else
   unpack $ODL_TARBALL_LOCATION 'opendaylight_src'
 fi
+patch_odl
 
 git clone $NETWORKING_ODL_REPO networking_odl
 pushd networking_odl
