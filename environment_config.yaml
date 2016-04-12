@@ -1,9 +1,4 @@
 attributes:
-  enable_gbp:
-    weight: 14
-    type: "checkbox"
-    value: false
-    label: "GBP features"
   enable_l3_odl:
     weight: 12
     type: "checkbox"
@@ -17,8 +12,25 @@ attributes:
     type: "checkbox"
     value: false
     label: "SFC features"
+  sfc_class:
+    weight: 14
+    type: "select"
+    value: "ncr"
+    label: "Classifier used by SFC"
+    values:
+      - data: "ncr"
+        label: "NetVirt"
+      - data: "gcr"
+        label: "GBP"
+    description:
+      >
+       Classifier determines what traffic needs to be chained based on policy based on yang model.
+       The OpenDayLight actually supports the OVSDB NetVirt and the GBP classifier in case of SFC.
+    restrictions:
+      - condition: "settings:opendaylight.enable_sfc.value == false"
+        action: "hide"
   enable_bgpvpn:
-    weight: 13
+    weight: 15
     type: "checkbox"
     value: false
     label: "BGPVPN extensions"
@@ -36,7 +48,7 @@ attributes:
         strict: false
         message: "Openvswitch with NSH support (fuel-plugin-ovs) must be installed and enabled."
   bgpvpn_gateway:
-    weight: 13
+    weight: 16
     type: "text"
     value: "0.0.0.0"
     description: "Define the default gateway for BGPVPN"
@@ -62,9 +74,11 @@ attributes:
         - odl-restconf-all
         - odl-aaa-authn
         - odl-dlux-all
-      gbp:
-        - odl-groupbasedpolicy-neutronmapper
-        - odl-groupbasedpolicy-ofoverlay
+      gcr:
+        - odl-groupbasedpolicy-ovssfc
+      ncr:
+        - odl-ovsdb-sfc
+        - odl-ovsdb-sfc-rest
       ovs:
         - odl-ovsdb-openstack
       sfc:
