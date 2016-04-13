@@ -41,7 +41,7 @@
     timeout: 120
 - id: odl_configure
   groups: ['primary-controller', 'controller']
-  requires: [deploy_start, cluster-haproxy]
+  requires: [deploy_start, primary-cluster-haproxy, cluster-haproxy]
   required_for: [neutron-configuration, openstack-haproxy, openstack-network-end]
   type: puppet
   parameters:
