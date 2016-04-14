@@ -176,3 +176,15 @@
     puppet_manifest: puppet/manifests/odl-nol3-configure_default_route.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
     timeout: 3600
+
+
+# POST DEPLOYMENT
+- id: odl_dashboard_registration
+  type: puppet
+  role: [primary-controller]
+  required_for: [post_deployment_end]
+  requires: [post_deployment_start]
+  parameters:
+    puppet_manifest: puppet/manifests/odl-dashboard.pp
+    puppet_modules: puppet/modules:/etc/puppet/modules
+    timeout: 180

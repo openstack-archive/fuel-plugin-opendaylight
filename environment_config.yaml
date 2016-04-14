@@ -92,6 +92,10 @@ attributes:
         - odl-sfcofl2
       vpn:
         - odl-vpnservice-openstack
+    default_credentials:
+      user: admin
+      password: admin
+    jetty_port: 8181
   rest_api_port:
     value: '8282'
     label: 'Port number'

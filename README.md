@@ -96,10 +96,6 @@ openjdk-8. JAVA8_URL variable points to the localization of openjdk-8 deb packag
 Testing
 -------
 
-Use the same IP address as for OpenStack Horizon panel and port 8181 to reach dlux web ui and apidoc explorer:
-
-* DLUX: http://horizon_ip:8181/index.html
-
 OpenDaylight files are stored on node with 'OpenDaylight' role assigned inside */opt/opendaylight* directory.
 
 To log in to OpenDayligt shell run */opt/opendaylight/bin/client -u karaf*
@@ -138,4 +134,4 @@ system.
 Contributors
 ------------
 
-* Michal Skalski <mskalski@mirantis.com>
+* https://github.com/openstack/fuel-plugin-opendaylight/graphs/contributors

@@ -37,7 +37,7 @@ DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
                   <Property name="jetty.host" <% if @bind_address %> default="<%= @bind_address %>" <% end %> />
                 </Set>
                 <Set name="port">
-                    <Property name="jetty.port" default="8181" />
+                    <Property name="jetty.port" default="<%= @jetty_port %>"/>
                 </Set>
                 <Set name="maxIdleTime">300000</Set>
                 <Set name="Acceptors">2</Set>

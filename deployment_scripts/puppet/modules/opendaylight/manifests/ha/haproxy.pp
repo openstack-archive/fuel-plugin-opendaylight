@@ -19,6 +19,7 @@ class opendaylight::ha::haproxy {
   $management_vip = hiera('management_vip')
   $odl = hiera('opendaylight')
   $api_port = $odl['rest_api_port']
+  $jetty_port = $odl['metadata']['jetty_port']
 
   # defaults for any haproxy_service within this class
   Openstack::Ha::Haproxy_service {
@@ -32,7 +33,7 @@ class opendaylight::ha::haproxy {
 
   openstack::ha::haproxy_service { 'odl-jetty':
     order                  => '216',
-    listen_port            => '8181',
+    listen_port            => $jetty_port,
     haproxy_config_options => {
       'option'         => ['httpchk /index.html', 'httplog'],
       'timeout client' => '3h',
