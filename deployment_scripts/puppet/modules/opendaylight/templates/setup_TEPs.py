@@ -218,9 +218,8 @@ def main():
     local_port = 'phy0'
     of_port = '6633'
 
-    # FIXME: That should come from fuel at some point in time
-    odl_user = 'admin'
-    odl_passw = 'admin'
+    odl_user = ASTUTE['opendaylight']['metadata']['default_credentials']['user']
+    odl_passw = ASTUTE['opendaylight']['metadata']['default_credentials']['password']
 
     odl_ha_ip = ASTUTE['network_metadata']['vips']['management']['ipaddr']
     odl_rest_api_port = ASTUTE['opendaylight']['rest_api_port']

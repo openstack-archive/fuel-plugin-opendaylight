@@ -3,11 +3,9 @@ name: opendaylight
 # Human-readable name for your plugin
 title: OpenDaylight plugin
 # Plugin version
-version: '0.8.1'
+version: '0.8.2'
 # Description
-description: 'This plugin provides OpenDaylight as a backend for neutron.
-Use the same IP address as for OpenStack Horizon and port 8181 to reach dlux web ui.
-  DLUX: http://<HORIZON_IP>:8181/index.html'
+description: 'This plugin provides OpenDaylight as a backend for neutron.'
 # Required fuel version
 fuel_version: ['8.0']
 # Specify license of your plugin
@@ -29,4 +27,6 @@ releases:
     repository_path: repositories/ubuntu
 
 # Version of plugin package
-package_version: '3.0.0'
+package_version: '4.0.0'
+
+is_hotpluggable: false

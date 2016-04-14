@@ -6,6 +6,7 @@ class opendaylight::install (
   $management_vip = hiera('management_vip')
   $odl = hiera('opendaylight')
   $conf_dir = '/opt/opendaylight/etc'
+  $jetty_port = $opendaylight::jetty_port
 
   if $odl['enable_l3_odl'] {
     $manage_l3_traffic = 'yes'
@@ -22,7 +23,7 @@ class opendaylight::install (
   }
 
   firewall {'215 odl':
-    port   => [ $opendaylight::rest_api_port, 6633, 6640, 6653, 8181, 8101],
+    port   => [ $opendaylight::rest_api_port, 6633, 6640, 6653, $jetty_port, 8101],
     proto  => 'tcp',
     action => 'accept',
   }
