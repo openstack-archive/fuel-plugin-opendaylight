@@ -1,7 +1,6 @@
 notice('MODULAR: odl-ml2.pp')
 
 $use_neutron = hiera('use_neutron', false)
-$compute     = roles_include('compute')
 
 class neutron {}
 class { 'neutron' :}
@@ -10,11 +9,17 @@ if $use_neutron {
   include ::neutron::params
 
   $node_name = hiera('node_name')
-  $primary_controller = roles_include(['primary-controller'])
+  $neutron_primary_controller_roles = hiera('neutron_primary_controller_roles', ['primary-controller'])
+  $neutron_compute_roles            = hiera('neutron_compute_nodes', ['compute'])
+  $primary_controller               = roles_include($neutron_primary_controller_roles)
+  $compute                          = roles_include($neutron_compute_roles)
 
   $neutron_config = hiera_hash('neutron_config')
   $neutron_server_enable = pick($neutron_config['neutron_server_enable'], true)
   $neutron_nodes = hiera_hash('neutron_nodes')
+
+  $dpdk_config = hiera_hash('dpdk', {})
+  $enable_dpdk = pick($dpdk_config['enabled'], false)
 
   $management_vip         = hiera('management_vip')
   $service_endpoint       = hiera('service_endpoint', $management_vip)

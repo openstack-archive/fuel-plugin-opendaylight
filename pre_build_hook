@@ -17,7 +17,7 @@ TMP_NAME="karaf-odl.tar.gz"
 
 #Networking odl
 NETWORKING_ODL_REPO=${NETWORKING_ODL_REPO:-https://github.com/openstack/networking-odl.git}
-NETWORKING_ODL_BRANCH=${NETWORKING_ODL_BRANCH:-stable/liberty}
+NETWORKING_ODL_BRANCH=${NETWORKING_ODL_BRANCH:-master}
 
 #Opnfv-quagga-packaging
 OPNFV_QUAGGE_PACKAGING_REPO=${OPNFV_QUAGGE_PACKAGING_REPO:-https://github.com/nikolas-hermanns/opnfv-quagga-packaging}

@@ -3,37 +3,41 @@
   role: [opendaylight]
   requires: [deploy_start]
   required_for: [deploy_end, primary-controller, controller]
-  tasks: [hiera, setup_repositories, fuel_pkgs, globals, tools, logging, odl-netconfig,
-        hosts, firewall, deploy_start, odl_install]
+  tasks: [hiera, setup_repositories, fuel_pkgs, globals, tools, logging, odl_install]
   parameters:
     strategy:
       type: parallel
 - id: odl_install
   type: puppet
+  version: 2.0.0
   groups: [opendaylight]
   requires: [deploy_start]
-  required_for: [openstack-network-start, odl_configure, cluster-haproxy]
-  requires: [hosts, firewall, globals]
+  required_for: [openstack-network-start, odl_configure]
+  requires: [hosts, firewall, globals, netconfig]
   parameters:
     puppet_manifest: puppet/manifests/odl-install.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
     timeout: 720
 - id: netconfig
-  type: skipped
-- id: odl-netconfig
   type: puppet
-  groups: [primary-controller, controller, cinder, cinder-vmware, compute, ceph-osd, primary-mongo, mongo, virt, ironic]
-  required_for: [firewall, hosts, connectivity_tests, openstack-network-start, generate_vms, primary-controller, controller, cinder, cinder-vmware, compute, ceph-osd, primary-mongo, mongo, virt, ironic, compute-vmware, opendaylight, deploy_end]
-  requires: [tools, hiera-override]
+  version: 2.0.0
+  groups: [primary-controller, controller, cinder, cinder-block-device, cinder-vmware, compute, ceph-osd, primary-mongo, mongo, virt, ironic]
+  required_for: [deploy_end]
+  requires: [tools]
   reexecute_on: [deploy_changes]
   parameters:
     puppet_manifest: puppet/manifests/odl-netconfig.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
     timeout: 3600
+  test_pre:
+    cmd: ruby /etc/puppet/modules/osnailyfacter/modular/netconfig/netconfig_pre.rb
+  test_post:
+    cmd: ruby /etc/puppet/modules/osnailyfacter/modular/netconfig/netconfig_post.rb
 - id: hiera-override
   type: puppet
   groups: ['primary-controller','controller','compute', 'opendaylight']
-  required_for: [odl-netconfig]
+  version: 2.0.0
+  required_for: [netconfig]
   requires: [globals]
   parameters:
     puppet_manifest: puppet/manifests/hiera-override.pp
@@ -41,46 +45,42 @@
     timeout: 120
 - id: odl_configure
   groups: ['primary-controller', 'controller']
+  version: 2.0.0
   requires: [deploy_start, primary-cluster-haproxy, cluster-haproxy]
-  required_for: [neutron-configuration, openstack-haproxy, openstack-network-end]
+  required_for: [openstack-network-common-config, openstack-haproxy, openstack-network-end]
   type: puppet
   parameters:
     puppet_manifest: puppet/manifests/odl-service.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
     timeout: 1400
 - id: openstack-network-common-config
-  type: skipped
-- id: neutron-configuration
   type: puppet
+  version: 2.0.0
   groups: [primary-controller,controller,compute]
-  required_for: [openstack-network-end, openstack-network-server-config]
+  required_for: [openstack-network-end]
   requires: [openstack-network-start]
   parameters:
-    puppet_manifest: puppet/manifests/neutron-configuration.pp
+    puppet_manifest: puppet/manifests/odl-common_config.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
     timeout: 1800
 - id: primary-openstack-network-plugins-l2
-  type: skipped
-- id: openstack-network-plugins-l2
-  type: skipped
-- id: odl-primary-network-plugins-l2
   type: puppet
   version: 2.0.0
   groups: [primary-controller]
   required_for: [openstack-network-end]
-  requires: [neutron-configuration, openstack-network-server-config]
-  refresh_on: [neutron_plugin_ml2, neutron_config, neutron_api_config]
+  requires: [openstack-network-start, openstack-network-common-config, openstack-network-server-config]
   parameters:
     puppet_manifest: puppet/manifests/odl-ml2-configuration.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
     timeout: 1800
-- id: odl-network-plugins-l2
+- id: openstack-network-plugins-l2
   type: puppet
   version: 2.0.0
   groups: [controller,compute]
   required_for: [openstack-network-end]
-  requires: [neutron-configuration, openstack-network-server-config]
-  refresh_on: [neutron_plugin_ml2, neutron_config, neutron_api_config]
+  requires: [openstack-network-start, openstack-network-common-config, openstack-network-server-config]
+  cross-depends:
+    - name: primary-openstack-network-plugins-l2
   parameters:
     puppet_manifest: puppet/manifests/odl-ml2-configuration.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
@@ -92,8 +92,42 @@
 # and move networks and router creation on the end.
 # In other case standard path is preserved, but additional
 # condition is added to tasks
+- id: primary-openstack-network-agents-l3
+  type: puppet
+  version: 2.0.0
+  groups: [primary-controller]
+  required_for: [openstack-network-end]
+  requires: [openstack-network-start, openstack-network-networks, openstack-network-routers, primary-openstack-network-plugins-l2, openstack-network-plugins-l2]
+  refresh_on: [neutron_l3_agent_config]
+  condition: "settings:opendaylight.enable_l3_odl == false"
+  parameters:
+    puppet_manifest: /etc/puppet/modules/openstack_tasks/examples/openstack-network/agents/l3.pp
+    puppet_modules: /etc/puppet/modules
+    timeout: 1800
+- id: openstack-network-agents-l3
+  type: puppet
+  version: 2.0.0
+  groups: [controller,compute]
+  required_for: [openstack-network-end]
+  requires: [openstack-network-start, openstack-network-networks, openstack-network-routers, primary-openstack-network-plugins-l2, openstack-network-plugins-l2]
+  refresh_on: [neutron_l3_agent_config]
+  condition: "settings:opendaylight.enable_l3_odl == false"
+  cross-depends:
+    - name: /(primary-)?openstack-network-plugins-l2/
+      role: ["/(primary-)?controller/"]
+    - name: primary-openstack-network-agents-l3
+  parameters:
+    puppet_manifest: /etc/puppet/modules/openstack_tasks/examples/openstack-network/agents/l3.pp
+    puppet_modules: /etc/puppet/modules
+    timeout: 1800
+
+
+# POST DEPLOYMENT
+# Additional task for routers when L3 HA is enabled
+# HA routers must be created on post-deployment step when all L3 agents are available
 - id: openstack-network-networks
   type: skipped
+  groups: [primary-controller]
 - id: odl-openstack-network-networks
   type: puppet
   version: 2.0.0
@@ -106,6 +140,7 @@
     timeout: 1800
 - id: openstack-network-routers
   type: skipped
+  groups: [primary-controller]
 - id: odl-openstack-network-routers
   type: puppet
   version: 2.0.0
@@ -116,74 +151,38 @@
     puppet_manifest: /etc/puppet/modules/osnailyfacter/modular/openstack-network/routers.pp
     puppet_modules: /etc/puppet/modules
     timeout: 1800
-# Additional task for routers when L3 HA is enabled
-# HA routers must be created on post-deployment step when all L3 agents are available
 - id: openstack-network-routers-ha
-  type: skipped
-- id: odl-openstack-network-routers-ha
   type: puppet
   version: 2.0.0
   role: [primary-controller]
-  condition: "settings:neutron_advanced_configuration.neutron_l3_ha.value == true and settings:opendaylight.enable_l3_odl.value == false"
+  condition: "settings:neutron_advanced_configuration.neutron_l3_ha == true and settings:opendaylight.enable_l3_odl == false"
   required_for: [post_deployment_end]
   requires: [post_deployment_start]
   parameters:
-    puppet_manifest: /etc/puppet/modules/osnailyfacter/modular/openstack-network/routers.pp
+    puppet_manifest: /etc/puppet/modules/openstack_tasks/examples/openstack-network/routers.pp
     puppet_modules: /etc/puppet/modules
     timeout: 1800
     cwd: /
-- id: primary-openstack-network-agents-l3
-  type: skipped
-- id: odl-nol3-primary-openstack-network-agents-l3
-  type: puppet
-  version: 2.0.0
-  groups: [primary-controller]
-  condition: "settings:opendaylight.enable_l3_odl.value == false"
-  required_for: [openstack-network-end]
-  requires: [odl-network-plugins-l2]
-  refresh_on: [neutron_l3_agent_config]
-  parameters:
-    puppet_manifest: /etc/puppet/modules/osnailyfacter/modular/openstack-network/agents/l3.pp
-    puppet_modules: /etc/puppet/modules
-    timeout: 1800
-- id: openstack-network-agents-l3
-  type: skipped
-- id: odl-nol3-openstack-network-agents-l3
-  type: puppet
-  version: 2.0.0
-  groups: [controller,compute]
-  condition: "settings:opendaylight.enable_l3_odl.value == false"
-  required_for: [primary-openstack-network-agents-dhcp, openstack-network-agents-dhcp, primary-openstack-network-agents-metadata, openstack-network-agents-metadata, openstack-network-end]
-  requires: [odl-network-plugins-l2]
-  refresh_on: [neutron_l3_agent_config]
-  cross-depends:
-    - name: /(primary-)?openstack-network-plugins-l2/
-    - name: odl-primary-openstack-network-agents-l3
-  parameters:
-    puppet_manifest: /etc/puppet/modules/osnailyfacter/modular/openstack-network/agents/l3.pp
-    puppet_modules: /etc/puppet/modules
-    timeout: 1800
 - id: configure_default_route
-  type: skipped
-- id: odl-nol3-configure_default_route
   type: puppet
-  version: 2.0.0
-  role: [primary-mongo, mongo, compute, ceph-osd, cinder]
-  condition: "settings:opendaylight.enable_l3_odl.value == false"
+  version: 2.1.0
+  role: [primary-mongo, mongo, compute, compute-vmware, ceph-osd, cinder, cinder-vmware]
   requires: [post_deployment_start]
   required_for: [post_deployment_end]
+  condition:
+    yaql_exp: >
+       (not $.opendaylight.enable_l3_odl) and
+       changedAny($.network_scheme, $.network_metadata.vips.management)
   parameters:
     puppet_manifest: puppet/manifests/odl-nol3-configure_default_route.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
     timeout: 3600
-
-
-# POST DEPLOYMENT
 - id: odl_dashboard_registration
   type: puppet
   role: [primary-controller]
   required_for: [post_deployment_end]
   requires: [post_deployment_start]
+  version: 2.0.0
   parameters:
     puppet_manifest: puppet/manifests/odl-dashboard.pp
     puppet_modules: puppet/modules:/etc/puppet/modules

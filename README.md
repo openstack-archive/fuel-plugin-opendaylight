@@ -7,7 +7,7 @@ OpenDaylight plugin
 Overview
 --------
 
-This is a proof of concept of the plugin which will install OpenDaylight controller and set it as manager for OVS using ovsdb plugin.
+This plugin will install OpenDaylight controller and set it as manager for OVS using ovsdb plugin.
 
 * [OpenDaylight controller](https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main) is a SDN controller.
 * [OVSDB plugin](https://wiki.opendaylight.org/view/OVSDB_Integration:Main) implement the Open vSwitch Database management protocol.
@@ -17,7 +17,7 @@ Requirements
 
 | Requirement                      | Version/Comment |
 |----------------------------------|-----------------|
-| Mirantis OpenStack compatibility | 8.0             |
+| Mirantis OpenStack compatibility | 9.0             |
 
 Limitations
 -----------

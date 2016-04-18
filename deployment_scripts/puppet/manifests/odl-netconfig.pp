@@ -1,32 +1,33 @@
+
 notice('MODULAR: odl-netconfig.pp')
 
 $roles = hiera('roles')
-
+#ODL custome network schema
 $network_scheme = odl_network_scheme($roles)
+prepare_network_config($network_scheme)
 
 if ( $::l23_os =~ /(?i:centos6)/ and $::kernelmajversion == '3.10' ) {
   $ovs_datapath_package_name = 'kmod-openvswitch-lt'
 }
 
-class { 'l23network' :
+$dpdk_options = hiera_hash('dpdk', {})
+
+class { '::l23network' :
   use_ovs                      => hiera('use_ovs', false),
   use_ovs_dkms_datapath_module => $::l23_os ? {
                                     /(?i:redhat7|centos7)/ => false,
                                     default                => true
                                   },
   ovs_datapath_package_name    => $ovs_datapath_package_name,
+  use_dpdk                     => pick($dpdk_options['enabled'], false),
+  dpdk_options                 => $dpdk_options,
 }
-prepare_network_config($network_scheme)
 $sdn = generate_network_config()
 notify {'SDN': message => $sdn }
 
 #Set arp_accept to 1 by default #lp1456272
 sysctl::value { 'net.ipv4.conf.all.arp_accept':   value => '1'  }
 sysctl::value { 'net.ipv4.conf.default.arp_accept':   value => '1'  }
-
-# setting kernel reserved ports
-# defaults are 49000,49001,35357,41055,41056,58882
-class { 'openstack::reserved_ports': }
 
 ### TCP connections keepalives and failover related parameters ###
 # configure TCP keepalive for host OS.
@@ -35,7 +36,7 @@ class { 'openstack::reserved_ports': }
 # during the check time frame, i.e. 30+3*8=54 seconds overall.
 # (note: overall check time frame should be lower then
 # nova_report_interval).
-class { 'openstack::keepalive' :
+class { '::openstack::keepalive' :
   tcpka_time   => '30',
   tcpka_probes => '8',
   tcpka_intvl  => '3',
@@ -49,7 +50,7 @@ L2_port<||> -> Sysfs_config_value<||>
 L3_ifconfig<||> -> Sysfs_config_value<||>
 L3_route<||> -> Sysfs_config_value<||>
 
-class { 'sysfs' :}
+class { '::sysfs' :}
 
 if hiera('set_rps', true) {
   sysfs_config_value { 'rps_cpus' :
@@ -58,6 +59,11 @@ if hiera('set_rps', true) {
     value   => cpu_affinity_hex($::processorcount),
     sysfs   => '/sys/class/net/*/queues/rx-*/rps_cpus',
     exclude => '/sys/class/net/lo/*',
+    }
+} else {
+  sysfs_config_value { 'rps_cpus' :
+    ensure => 'absent',
+    name   => '/etc/sysfs.d/rps_cpus.conf',
   }
 }
 
@@ -68,6 +74,11 @@ if hiera('set_xps', true) {
     value   => cpu_affinity_hex($::processorcount),
     sysfs   => '/sys/class/net/*/queues/tx-*/xps_cpus',
     exclude => '/sys/class/net/lo/*',
+  }
+} else {
+  sysfs_config_value { 'xps_cpus' :
+    ensure => 'absent',
+    name   => '/etc/sysfs.d/xps_cpus.conf',
   }
 }
 
@@ -108,5 +119,5 @@ if $run_ping_checker {
     L3_route<||> -> Ping_host[$default_gateway]
 }
 
-Class['l23network'] ->
+Class['::l23network'] ->
 Exec['wait-for-interfaces']

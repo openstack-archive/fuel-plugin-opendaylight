@@ -1,4 +1,4 @@
-notice('MODULAR: neutron-configuration.pp')
+notice('MODULAR: odl-common_config.pp')
 
 include opendaylight
 $use_neutron = hiera('use_neutron', false)
@@ -25,30 +25,46 @@ if $use_neutron {
     $ext_interface = $patch_jacks_names[0]
   }
 
-  $openstack_network_hash = hiera_hash('openstack_network', { })
-  $neutron_config         = hiera_hash('neutron_config')
+  $openstack_network_hash  = hiera_hash('openstack_network', { })
+  $neutron_config          = hiera_hash('neutron_config')
+  $neutron_advanced_config = hiera_hash('neutron_advanced_configuration', { })
+  $enable_qos              = pick($neutron_advanced_config['neutron_qos'], false)
 
-  $core_plugin            = 'neutron.plugins.ml2.plugin.Ml2Plugin'
+  $core_plugin             = 'neutron.plugins.ml2.plugin.Ml2Plugin'
 
   if $odl['enable_l3_odl'] {
-    $service_plugins        = [
+    $default_service_plugins        = [
       'networking_odl.l3.l3_odl.OpenDaylightL3RouterPlugin',
       'neutron.services.metering.metering_plugin.MeteringPlugin',
     ]
   } else {
-    $service_plugins        = [
+    $default_service_plugins        = [
       'neutron.services.l3_router.l3_router_plugin.L3RouterPlugin',
       'neutron.services.metering.metering_plugin.MeteringPlugin',
     ]
   }
 
-  $rabbit_hash      = hiera_hash('rabbit_hash', { })
-  $ceilometer_hash  = hiera_hash('ceilometer', { })
-  $network_scheme   = hiera_hash('network_scheme')
+  if $enable_qos {
+    $service_plugins = concat($default_service_plugins, ['qos'])
+  } else {
+    $service_plugins = $default_service_plugins
+  }
+
+  $neutron_config_l3   = pick($neutron_config['l3'], {})
+  $dhcp_lease_duration = pick($neutron_config_l3['dhcp_lease_duration'], '600')
+
+  $rabbit_hash      = hiera_hash('rabbit', {})
+  $ceilometer_hash  = hiera_hash('ceilometer', {})
+  $network_scheme   = hiera_hash('network_scheme', {})
 
   $verbose      = pick($openstack_network_hash['verbose'], hiera('verbose', true))
   $debug        = pick($openstack_network_hash['debug'], hiera('debug', true))
-  $use_syslog   = hiera('use_syslog', true)
+  # TODO(aschultz): LP#1499620 - neutron in UCA liberty fails to start with
+  # syslog enabled.
+  $use_syslog = $::os_package_type ? {
+    'ubuntu' => false,
+    default  => hiera('use_syslog', true)
+  }
   $use_stderr   = hiera('use_stderr', false)
   $log_facility = hiera('syslog_log_facility_neutron', 'LOG_LOCAL4')
 
@@ -56,10 +72,11 @@ if $use_neutron {
   $bind_host = get_network_role_property('neutron/api', 'ipaddr')
 
   $base_mac       = $neutron_config['L2']['base_mac']
-  $use_ceilometer = $ceilometer_hash['enabled']
   $amqp_hosts     = split(hiera('amqp_hosts', ''), ',')
   $amqp_user      = $rabbit_hash['user']
   $amqp_password  = $rabbit_hash['password']
+
+  $kombu_compression = hiera('kombu_compression', '')
 
   $segmentation_type = try_get_value($neutron_config, 'L2/segmentation_type')
 
@@ -67,9 +84,6 @@ if $use_neutron {
 
   if $segmentation_type == 'vlan' {
     $net_role_property    = 'neutron/private'
-    $iface                = get_network_role_property($net_role_property, 'phys_dev')
-    $mtu_for_virt_network = pick(get_transformation_property('mtu', $iface[0]), '1500')
-    $overlay_net_mtu      = $mtu_for_virt_network
 
     if $ext_interface {
       exec { 'ovs-set-provider-mapping':
@@ -84,11 +98,9 @@ if $use_neutron {
         require => Exec['ovs-set-manager'],
       }
     }
-
   } else {
     $net_role_property = 'neutron/mesh'
-    $iface             = get_network_role_property($net_role_property, 'phys_dev')
-    $tunneling_ip      = get_network_role_property($net_role_property, 'ipaddr')
+    $tunneling_ip = get_network_role_property($net_role_property, 'ipaddr')
 
     # With bgpvpn feature enabled the connectivity to the outside world
     # is solved in another way.
@@ -121,31 +133,18 @@ if $use_neutron {
         path => '/usr/local/bin:/usr/bin:/sbin:/bin:/usr/local/sbin:/usr/sbin',
       }
     }
-
-    $physical_net_mtu  = pick(get_transformation_property('mtu', $iface[0]), '1500')
-
-    if $segmentation_type == 'gre' {
-      $mtu_offset = '42'
-    } else {
-    # vxlan is the default segmentation type for non-vlan cases
-      $mtu_offset = '50'
-    }
-
-    if $physical_net_mtu {
-      $overlay_net_mtu = $physical_net_mtu - $mtu_offset
-    } else {
-      $overlay_net_mtu = '1500' - $mtu_offset
-    }
-
   }
+  $iface           = get_network_role_property($net_role_property, 'phys_dev')
+  $physical_net_mtu = pick(get_transformation_property('mtu', $iface[0]), '1500')
 
   $default_log_levels  = hiera_hash('default_log_levels')
 
-  class { 'neutron' :
+  class { '::neutron' :
     verbose                 => $verbose,
     debug                   => $debug,
     use_syslog              => $use_syslog,
     use_stderr              => $use_stderr,
+    lock_path               => '/var/lib/neutron/lock',
     log_facility            => $log_facility,
     bind_host               => $bind_host,
     base_mac                => $base_mac,
@@ -153,15 +152,24 @@ if $use_neutron {
     service_plugins         => $service_plugins,
     allow_overlapping_ips   => true,
     mac_generation_retries  => '32',
-    dhcp_lease_duration     => '600',
+    dhcp_lease_duration     => $dhcp_lease_duration,
     dhcp_agents_per_network => '2',
-    report_interval         => '10',
+    report_interval         => $neutron_config['neutron_report_interval'],
     rabbit_user             => $amqp_user,
     rabbit_hosts            => $amqp_hosts,
     rabbit_password         => $amqp_password,
-    kombu_reconnect_delay   => '5.0',
-    network_device_mtu      => $overlay_net_mtu,
+    network_device_mtu      => $physical_net_mtu,
     advertise_mtu           => true,
+  }
+
+  # TODO (iberezovskiy): remove this workaround in N when neutron module
+  # will be switched to puppet-oslo usage for rabbit configuration
+  if $kombu_compression in ['gzip','bz2'] {
+    if !defined(Oslo::Messaging_rabbit['neutron_config']) and !defined(Neutron_config['oslo_messaging_rabbit/kombu_compression']) {
+      neutron_config { 'oslo_messaging_rabbit/kombu_compression': value => $kombu_compression; }
+    } else {
+      Neutron_config<| title == 'oslo_messaging_rabbit/kombu_compression' |> { value => $kombu_compression }
+    }
   }
 
   if $default_log_levels {
@@ -177,8 +185,8 @@ if $use_neutron {
     neutron_config { 'DEFAULT/use_syslog_rfc_format': value => true; }
   }
 
-  if $use_ceilometer {
-    neutron_config { 'DEFAULT/notification_driver': value => 'messaging' }
+  neutron_config {
+    'DEFAULT/notification_driver': value => $ceilometer_hash['notification_driver'];
   }
 
 }
