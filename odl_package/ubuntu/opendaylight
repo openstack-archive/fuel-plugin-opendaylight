@@ -18,6 +18,9 @@ env MAIN="org.apache.karaf.main.Main"
 chdir /opt/opendaylight
 
 script
+  # Try to find lang used in system
+  test -f /etc/default/locale && . /etc/default/locale || true
+  export LANG=$LANG
   export KARAF_BASE="$KARAF_HOME"
   export KARAF_DATA="$KARAF_BASE/data"
   export KARAF_ETC="$KARAF_BASE/etc"
