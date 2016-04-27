@@ -44,9 +44,6 @@ attributes:
         strict: false
         message: "BGPVPN (fuel-plugin-bgpvpn) plugin must be installed and enabled."
       - networking_parameters:segmentation_type == 'vlan': This feature works only with segmentation_type != vlan
-      - condition: "settings:fuel-plugin-ovs == null or settings:fuel-plugin-ovs.metadata.enabled == false"
-        strict: false
-        message: "Openvswitch with NSH support (fuel-plugin-ovs) must be installed and enabled."
   bgpvpn_gateway:
     weight: 16
     type: "text"
