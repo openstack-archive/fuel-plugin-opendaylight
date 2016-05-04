@@ -9,8 +9,14 @@ module Puppet::Parser::Functions
     hiera_overrides = {}
     configuration = {}
 
+    if odl['odl_v2']
+      mechanism_driver = 'opendaylight_v2'
+    else
+      mechanism_driver = 'opendaylight'
+    end
+
     ml2_plugin = {'neutron_plugin_ml2' =>
-                   {'ml2/mechanism_drivers' => {'value' => 'opendaylight'},
+                   {'ml2/mechanism_drivers' => {'value' => mechanism_driver},
                    'ml2_odl/password' => {'value' => 'admin'},
                    'ml2_odl/username' => {'value' => 'admin'},
                    'ml2_odl/url' => {'value' => "http://#{management_vip}:#{odl['rest_api_port']}/controller/nb/v2/neutron"}

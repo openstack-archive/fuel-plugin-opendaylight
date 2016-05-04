@@ -55,6 +55,12 @@ attributes:
     regex:
       source: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
       error: 'Invalid ip number'
+  odl_v2:
+    weight: 17
+    type: "checkbox"
+    value: false
+    label: "Use V2 ML2 driver"
+    description: "V2 version is considered as experimental"
   metadata:
     restrictions:
       - "cluster:net_provider != 'neutron'": "Only neutron is supported by OpenDaylight"
