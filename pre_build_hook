@@ -170,6 +170,13 @@ function patch_odl {
   cp $SRC $TARGET
 }
 
+function patch_networking_odl_deb {
+  if grep -q "neutron-lib>=0.1.0" $1
+  then
+    sed -i -e "s/neutron-lib>=0.1.0/neutron-lib>=0.0.1/" $1
+  fi
+}
+
 function build_pkg {
   case $1 in
     centos)
@@ -181,6 +188,7 @@ function build_pkg {
     ubuntu)
       pushd "${DIR}/repositories/${1}/"
       fpm --architecture all --force -s dir -t deb -m 'mskalski@mirantis.com' --version "${ODL_VERSION_NUMBER}" --description "${ODL_DESCRIPTION}" --prefix /opt/opendaylight --deb-upstart "${DIR}/odl_package/${1}/opendaylight" --after-install "${DIR}/odl_package/${1}/opendaylight-post" --name opendaylight -d "${JAVA_VERSION}" -C "${TMP_DIR}/opendaylight_src"
+      patch_networking_odl_deb ${TMP_DIR}/networking_odl/requirements.txt
       fpm --architecture all --force -s python -t deb -m 'mskalski@mirantis.com' --python-install-lib /usr/lib/python2.7/dist-packages ${TMP_DIR}/networking_odl/setup.py
       download_dependencies ${1}
       popd

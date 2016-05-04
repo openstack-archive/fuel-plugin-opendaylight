@@ -32,9 +32,15 @@ if $use_neutron {
 
   $core_plugin             = 'neutron.plugins.ml2.plugin.Ml2Plugin'
 
+  if $odl['odl_v2'] {
+    $odl_plugin = 'odl-router_v2'
+  } else {
+    $odl_plugin = 'odl-router'
+  }
+
   if $odl['enable_l3_odl'] {
     $default_service_plugins        = [
-      'networking_odl.l3.l3_odl.OpenDaylightL3RouterPlugin',
+      $odl_plugin,
       'neutron.services.metering.metering_plugin.MeteringPlugin',
     ]
   } else {
