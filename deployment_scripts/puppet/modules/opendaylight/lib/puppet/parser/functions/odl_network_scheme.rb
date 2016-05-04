@@ -6,11 +6,9 @@
 #
 module Puppet::Parser::Functions
   newfunction(:odl_network_scheme, :type => :rvalue) do |args|
-    node_roles = args[0]
     # override network_scheme
     odl = function_hiera(['opendaylight'])
     network_scheme = function_hiera(['network_scheme'])
-    management_vrouter_vip = function_hiera(['management_vrouter_vip'])
 
     if odl['enable_bgpvpn']
       # If bgpvpn extensions are enabled br-ex is not needed
@@ -33,6 +31,7 @@ module Puppet::Parser::Functions
       if not endpoints.has_key? 'br-ex-lnx'
         transformations.each { |action| action['name'] = 'br-ex-lnx' if (action['action'] == 'add-br' and action['name'] == 'br-ex') }
         transformations.each { |action| action['bridge'] = 'br-ex-lnx' if (action['action'] == 'add-port' and action['bridge'] == 'br-ex') }
+        transformations.each { |action| action['bridge'] = 'br-ex-lnx' if (action['action'] == 'add-bond' and action['bridge'] == 'br-ex') }
       end
 
       transformations.each { |action| action['name'] = 'br-ex' if (action['action'] == 'add-br' and action['name'] == 'br-floating') }
