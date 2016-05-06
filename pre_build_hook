@@ -10,6 +10,23 @@ set -eux
 ODL_TARBALL_LOCATION=${ODL_TARBALL_LOCATION:-https://nexus.opendaylight.org/content/repositories/opendaylight.release/org/opendaylight/integration/distribution-karaf/0.4.1-Beryllium-SR1/distribution-karaf-0.4.1-Beryllium-SR1.tar.gz}
 JAVA8_URL=${JAVA8_URL:-https://launchpad.net/~openjdk-r/+archive/ubuntu/ppa/+files/openjdk-8-jre-headless_8u72-b15-1~trusty1_amd64.deb}
 
+#ODL openflowjava NSH subtype patch related
+# The patch's TAG should mach with ODL release being patched
+# Normally it is release/beryllium-sr1 for ditribution-karaf-0.4.1-Beryllium-SR1.tar.gz
+#                release/beryllium-sr2 for ditribution-karaf-0.4.2-Beryllium-SR2.tar.gz
+#                stable/beryllium      for ditribution-karaf-0.4.x-SNAPSHOT.tar.gz
+# The patch should be explicitly enabled, since its build time is 1 hour and only applies
+# while the openvswitch in fuel-plugin-ovs is not compatible with the actual openflow
+# implementation of OpenDayLight. There is a possibility to build the patch separately
+# and put into folder odl_package/nsh-pritesh-patch. Remember checking the file's naming
+# in this case. If the plugin encounters the supplied jarball it wont build itself but
+# will try using the supplied one.
+ENA_NSH_SUB_PATCH=${ENA_NSH_SUB_PATCH:-false}
+REPO=${REPO:-'openflowplugin'}
+ODLTAG=${ODLTAG:-'release/beryllium-sr2'}
+JARBALL=${JARBALL:-'openflowjava-extension-nicira'}
+bdart=''
+
 #Verion number used in deb/rpm package
 ODL_VERSION_NUMBER=${ODL_VERSION_NUMBER:-0.4.1}
 ODL_DESCRIPTION="OpenDaylight SDN Controller"
@@ -80,6 +97,79 @@ function download_dependencies {
   fi
 }
 
+
+#
+#ODL patch related
+function putbldenv() {
+  cat >env.sh <<EOF
+#!bin/bash
+REPO=${REPO}
+ODLTAG=${ODLTAG}
+EOF
+}
+
+function compute_ver() {
+  local ret=''
+  local rel=''
+  local amm=''
+
+  local tag=$(echo $1 | cut -d '/' -f 2)
+  if  [ "$tag" != "${tag/-/}" ]; then
+    rel=$(echo $tag | cut -d '-' -f 1 | sed 's/.*/\u&/')
+    amm=$(echo $tag | cut -d '-' -f 2 | tr '[:lower:]' '[:upper:]')
+    ret="${rel}-${amm}"
+  else
+    rel=$(echo $tag | sed 's/.*/\u&/')
+    ret="${rel}"
+  fi
+  echo $ret
+}
+
+function build_jarball() {
+  local reporoot="/root/${REPO}"
+  local  niciart="extension/${JARBALL}/target"
+  local   artexp="odl_package/nsh-pritesh-patch"
+  local      bld=''
+  local      ver=''
+
+  case $1 in
+    ubuntu)
+      pushd ${DIR}/ofjavansh
+      putbldenv
+      wget -N https://raw.githubusercontent.com/opendaylight/odlparent/stable/beryllium/settings.xml
+      sudo docker build -t ofjavansh .
+      container_id=$(sudo docker run  -d ofjavansh)
+      bld=$(echo $ODLTAG | cut -d '/' -f 1)
+      if [ "$bld" == "release" ] ; then
+	ver=$(compute_ver $ODLTAG)
+      else
+        ver='SNAPSHOT'
+      fi
+      mkdir -p ${DIR}/d
+      sudo docker cp $container_id:${reporoot}/${niciart}/. ${DIR}/d
+      pushd ${DIR}/d
+      bdart=$(echo ${JARBALL}-[0-9].[0-9].[0-9]-${ver}.jar)
+      cp $bdart ${DIR}/${artexp}/
+      popd
+      sudo rm -rf ${DIR}/d
+      popd
+      ;;
+    *)
+      echo "Not supported system"
+      exit 1
+      ;;
+  esac
+}
+
+function patch_odl {
+  local artexp="odl_package/nsh-pritesh-patch"
+  local TARBASE="opendaylight_src/system/org/opendaylight/openflowplugin/openflowjava-extension-nicira"
+  local    SRC="${DIR}/${artexp}/${bdart}"
+  echo "patching..."
+  TARGET=$(echo ${TMP_DIR}/${TARBASE}/*/${bdart})
+  cp $SRC $TARGET
+}
+
 function build_pkg {
   case $1 in
     centos)
@@ -119,6 +209,14 @@ then
   unpack $TMP_NAME 'opendaylight_src'
 else
   unpack $ODL_TARBALL_LOCATION 'opendaylight_src'
+fi
+
+if [ "ENA_NSH_SUB_PATCH" = true ] ; then
+  jarpatch=$(echo ${DIR}/odl_package/nsh-pritesh-patch/${JARBALL}-*.jar)
+  if [ ! -f "$jarpatch" ]
+    build_jarball $BUILD_FOR
+  fi
+  patch_odl
 fi
 
 git clone $NETWORKING_ODL_REPO networking_odl
