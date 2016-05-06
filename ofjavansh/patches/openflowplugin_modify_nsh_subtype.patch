@@ -1,0 +1,144 @@
+diff -ruN a/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/action/SetNshc1Codec.java b/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/action/SetNshc1Codec.java
+--- a/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/action/SetNshc1Codec.java	2015-09-30 10:48:23.542944040 +0800
++++ b/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/action/SetNshc1Codec.java	2015-09-30 10:52:57.218939666 +0800
+@@ -29,7 +29,7 @@
+     private static final Logger LOG = LoggerFactory.getLogger(SetNshc1Codec.class);
+ 
+     public static final int LENGTH = 16;
+-    public static final byte NXAST_SET_NSC_SUBTYPE = 34;
++    public static final byte NXAST_SET_NSC_SUBTYPE = 107;
+     public static final NiciraActionSerializerKey SERIALIZER_KEY =
+             new NiciraActionSerializerKey(EncodeConstants.OF13_VERSION_ID, ActionSetNshc1.class);
+     public static final NiciraActionDeserializerKey DESERIALIZER_KEY =
+diff -ruN a/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/action/SetNshc2Codec.java b/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/action/SetNshc2Codec.java
+--- a/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/action/SetNshc2Codec.java	2015-09-30 10:48:23.542944040 +0800
++++ b/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/action/SetNshc2Codec.java	2015-09-30 10:53:04.550939549 +0800
+@@ -24,7 +24,7 @@
+  */
+ public class SetNshc2Codec extends AbstractActionCodec {
+     public static final int LENGTH = 16;
+-    public static final byte NXAST_SET_NSC_SUBTYPE = 35;
++    public static final byte NXAST_SET_NSC_SUBTYPE = 108;
+     public static final NiciraActionSerializerKey SERIALIZER_KEY =
+             new NiciraActionSerializerKey(EncodeConstants.OF13_VERSION_ID, ActionSetNshc2.class);
+     public static final NiciraActionDeserializerKey DESERIALIZER_KEY =
+diff -ruN a/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/action/SetNshc3Codec.java b/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/action/SetNshc3Codec.java
+--- a/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/action/SetNshc3Codec.java	2015-09-30 10:48:23.542944040 +0800
++++ b/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/action/SetNshc3Codec.java	2015-09-30 10:53:11.622939436 +0800
+@@ -24,7 +24,7 @@
+  */
+ public class SetNshc3Codec extends AbstractActionCodec {
+     public static final int LENGTH = 16;
+-    public static final byte NXAST_SET_NSC_SUBTYPE = 36;
++    public static final byte NXAST_SET_NSC_SUBTYPE = 109;
+     public static final NiciraActionSerializerKey SERIALIZER_KEY =
+             new NiciraActionSerializerKey(EncodeConstants.OF13_VERSION_ID, ActionSetNshc3.class);
+     public static final NiciraActionDeserializerKey DESERIALIZER_KEY =
+diff -ruN a/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/action/SetNshc4Codec.java b/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/action/SetNshc4Codec.java
+--- a/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/action/SetNshc4Codec.java	2015-09-30 10:48:23.542944040 +0800
++++ b/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/action/SetNshc4Codec.java	2015-09-30 10:53:18.511939325 +0800
+@@ -24,7 +24,7 @@
+  */
+ public class SetNshc4Codec extends AbstractActionCodec {
+     public static final int LENGTH = 16;
+-    public static final byte NXAST_SET_NSC_SUBTYPE = 37;
++    public static final byte NXAST_SET_NSC_SUBTYPE = 110;
+     public static final NiciraActionSerializerKey SERIALIZER_KEY =
+             new NiciraActionSerializerKey(EncodeConstants.OF13_VERSION_ID, ActionSetNshc4.class);
+     public static final NiciraActionDeserializerKey DESERIALIZER_KEY =
+diff -ruN a/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/action/SetNsiCodec.java b/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/action/SetNsiCodec.java
+--- a/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/action/SetNsiCodec.java	2015-09-30 10:48:23.542944040 +0800
++++ b/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/action/SetNsiCodec.java	2015-09-30 10:52:47.236939825 +0800
+@@ -25,7 +25,7 @@
+  */
+ public class SetNsiCodec extends AbstractActionCodec {
+     public static final int LENGTH = 16;
+-    public static final byte NXAST_SET_NSI_SUBTYPE = 33;
++    public static final byte NXAST_SET_NSI_SUBTYPE = 106;
+     public static final NiciraActionSerializerKey SERIALIZER_KEY =
+             new NiciraActionSerializerKey(EncodeConstants.OF13_VERSION_ID, ActionSetNsi.class);
+     public static final NiciraActionDeserializerKey DESERIALIZER_KEY =
+diff -ruN a/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/action/SetNspCodec.java b/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/action/SetNspCodec.java
+--- a/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/action/SetNspCodec.java	2015-09-30 10:48:23.541944040 +0800
++++ b/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/action/SetNspCodec.java	2015-09-30 10:52:39.654939947 +0800
+@@ -25,7 +25,7 @@
+  */
+ public class SetNspCodec extends AbstractActionCodec {
+     public static final int LENGTH = 16;
+-    public static final byte NXAST_SET_NSP_SUBTYPE = 32;
++    public static final byte NXAST_SET_NSP_SUBTYPE = 105;
+     public static final NiciraActionSerializerKey SERIALIZER_KEY =
+             new NiciraActionSerializerKey(EncodeConstants.OF13_VERSION_ID, ActionSetNsp.class);
+     public static final NiciraActionDeserializerKey DESERIALIZER_KEY =
+diff -ruN a/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/match/Nshc1Codec.java b/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/match/Nshc1Codec.java
+--- a/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/match/Nshc1Codec.java	2015-09-30 10:48:23.542944040 +0800
++++ b/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/match/Nshc1Codec.java	2015-09-30 10:52:05.113940499 +0800
+@@ -27,7 +27,7 @@
+ public class Nshc1Codec extends AbstractMatchCodec {
+ 
+     private static final int VALUE_LENGTH = 4;
+-    private static final int NXM_FIELD_CODE = 39;
++    private static final int NXM_FIELD_CODE = 107;
+     public static final MatchEntrySerializerKey<Nxm1Class, NxmNxNshc1> SERIALIZER_KEY = new MatchEntrySerializerKey<>(
+             EncodeConstants.OF13_VERSION_ID, Nxm1Class.class, NxmNxNshc1.class);
+     public static final MatchEntryDeserializerKey DESERIALIZER_KEY = new MatchEntryDeserializerKey(
+diff -ruN a/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/match/Nshc2Codec.java b/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/match/Nshc2Codec.java
+--- a/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/match/Nshc2Codec.java	2015-09-30 10:48:23.542944040 +0800
++++ b/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/match/Nshc2Codec.java	2015-09-30 10:52:03.282940528 +0800
+@@ -27,7 +27,7 @@
+ public class Nshc2Codec extends AbstractMatchCodec {
+ 
+     private static final int VALUE_LENGTH = 4;
+-    private static final int NXM_FIELD_CODE = 40;
++    private static final int NXM_FIELD_CODE = 108;
+     public static final MatchEntrySerializerKey<Nxm1Class, NxmNxNshc2> SERIALIZER_KEY = new MatchEntrySerializerKey<>(
+             EncodeConstants.OF13_VERSION_ID, Nxm1Class.class, NxmNxNshc2.class);
+     public static final MatchEntryDeserializerKey DESERIALIZER_KEY = new MatchEntryDeserializerKey(
+diff -ruN a/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/match/Nshc3Codec.java b/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/match/Nshc3Codec.java
+--- a/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/match/Nshc3Codec.java	2015-09-30 10:48:23.543944040 +0800
++++ b/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/match/Nshc3Codec.java	2015-09-30 10:52:14.114940355 +0800
+@@ -27,7 +27,7 @@
+ public class Nshc3Codec extends AbstractMatchCodec {
+ 
+     private static final int VALUE_LENGTH = 4;
+-    private static final int NXM_FIELD_CODE = 41;
++    private static final int NXM_FIELD_CODE = 109;
+     public static final MatchEntrySerializerKey<Nxm1Class, NxmNxNshc3> SERIALIZER_KEY = new MatchEntrySerializerKey<>(
+             EncodeConstants.OF13_VERSION_ID, Nxm1Class.class, NxmNxNshc3.class);
+     public static final MatchEntryDeserializerKey DESERIALIZER_KEY = new MatchEntryDeserializerKey(
+diff -ruN a/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/match/Nshc4Codec.java b/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/match/Nshc4Codec.java
+--- a/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/match/Nshc4Codec.java	2015-09-30 10:48:23.543944040 +0800
++++ b/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/match/Nshc4Codec.java	2015-09-30 10:52:22.790940216 +0800
+@@ -27,7 +27,7 @@
+ public class Nshc4Codec extends AbstractMatchCodec {
+ 
+     private static final int VALUE_LENGTH = 4;
+-    private static final int NXM_FIELD_CODE = 42;
++    private static final int NXM_FIELD_CODE = 110;
+     public static final MatchEntrySerializerKey<Nxm1Class, NxmNxNshc4> SERIALIZER_KEY = new MatchEntrySerializerKey<>(
+             EncodeConstants.OF13_VERSION_ID, Nxm1Class.class, NxmNxNshc4.class);
+     public static final MatchEntryDeserializerKey DESERIALIZER_KEY = new MatchEntryDeserializerKey(
+diff -ruN a/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/match/NsiCodec.java b/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/match/NsiCodec.java
+--- a/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/match/NsiCodec.java	2015-09-30 10:48:23.543944040 +0800
++++ b/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/match/NsiCodec.java	2015-09-30 10:51:49.440940749 +0800
+@@ -28,7 +28,7 @@
+ public class NsiCodec extends AbstractMatchCodec {
+ 
+     private static final int VALUE_LENGTH = 1;
+-    private static final int NXM_FIELD_CODE = 38;
++    private static final int NXM_FIELD_CODE = 106;
+     public static final MatchEntrySerializerKey<Nxm1Class, NxmNxNsi> SERIALIZER_KEY = new MatchEntrySerializerKey<>(
+             EncodeConstants.OF13_VERSION_ID, Nxm1Class.class, NxmNxNsi.class);
+     public static final MatchEntryDeserializerKey DESERIALIZER_KEY = new MatchEntryDeserializerKey(
+diff -ruN a/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/match/NspCodec.java b/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/match/NspCodec.java
+--- a/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/match/NspCodec.java	2015-09-30 10:48:23.543944040 +0800
++++ b/extension/openflowjava-extension-nicira/src/main/java/org/opendaylight/openflowjava/nx/codec/match/NspCodec.java	2015-09-30 10:51:41.146940882 +0800
+@@ -28,7 +28,7 @@
+ public class NspCodec extends AbstractMatchCodec {
+ 
+     private static final int VALUE_LENGTH = 4;
+-    private static final int NXM_FIELD_CODE = 37;
++    private static final int NXM_FIELD_CODE = 105;
+     public static final MatchEntrySerializerKey<Nxm1Class, NxmNxNsp> SERIALIZER_KEY = new MatchEntrySerializerKey<>(
+             EncodeConstants.OF13_VERSION_ID, Nxm1Class.class, NxmNxNsp.class);
+     public static final MatchEntryDeserializerKey DESERIALIZER_KEY = new MatchEntryDeserializerKey(
