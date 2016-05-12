@@ -95,6 +95,8 @@ attributes:
         - odl-sfcofl2
       vpn:
         - odl-vpnservice-openstack
+      cluster:
+        - odl-jolokia
     default_credentials:
       user: admin
       password: admin

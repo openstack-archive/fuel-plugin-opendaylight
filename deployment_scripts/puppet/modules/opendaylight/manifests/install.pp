@@ -1,12 +1,17 @@
 class opendaylight::install (
   $rest_port = $opendaylight::rest_api_port,
-  $bind_address = undef,
+  $odl_nodes_names = $opendaylight::odl_nodes_names,
+  $odl_nodes_ips   = $opendaylight::odl_mgmt_ips,
+  $bind_address = $opendaylight::node_internal_address,
 ) {
 
   $management_vip = hiera('management_vip')
   $odl = hiera('opendaylight')
   $conf_dir = '/opt/opendaylight/etc'
   $jetty_port = $opendaylight::jetty_port
+  $odl_nodes_number = count($odl_nodes_ips)
+  $node_uid = hiera('uid')
+  $node_name = "node-${node_uid}"
 
   if $odl['enable_l3_odl'] {
     $manage_l3_traffic = 'yes'
@@ -23,7 +28,7 @@ class opendaylight::install (
   }
 
   firewall {'215 odl':
-    port   => [ $opendaylight::rest_api_port, 6633, 6640, 6653, $jetty_port, 8101],
+    port   => [ 2550, 2551, $rest_port, 6633, 6640, 6653, $jetty_port, 8101],
     proto  => 'tcp',
     action => 'accept',
   }
@@ -66,6 +71,29 @@ class opendaylight::install (
     path              => "${conf_dir}/org.apache.karaf.features.cfg",
     setting           => 'featuresBoot',
     value             => $enabled_features,
+  }
+
+  if $odl_nodes_number >= 2 {
+    #HA configuration
+    file {'/opt/opendaylight/configuration/initial':
+      ensure => 'directory',
+      owner  => 'odl',
+      group  => 'odl'
+    }
+
+    file {'/opt/opendaylight/configuration/initial/akka.conf':
+      ensure  => file,
+      owner   => 'odl',
+      content => template('opendaylight/akka.conf.erb'),
+      require => File['/opt/opendaylight/configuration/initial'],
+    }
+    file {'/opt/opendaylight/configuration/initial/module-shards.conf':
+      ensure  => file,
+      owner   => 'odl',
+      content => template('opendaylight/module-shards.conf.erb'),
+      require => File['/opt/opendaylight/configuration/initial'],
+    }
+
   }
 
   Package['opendaylight'] ->
