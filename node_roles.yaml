@@ -5,5 +5,5 @@ opendaylight:
   public_ip_required: false         # whether requires public net or not
   weight: 150                       # weight that will be used for ordering on fuel ui
   limits:
-    max: 1
     min: 1
+    recommended: 3
