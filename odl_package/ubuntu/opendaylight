@@ -14,7 +14,7 @@ env JAVA_OPTS="-server -Xms256M -Xmx2048M -XX:+UnlockDiagnosticVMOptions -XX:+Un
 env OPTS="-Dkaraf.startLocalConsole=false -Dkaraf.startRemoteShell=true"
 env MAIN="org.apache.karaf.main.Main"
 
-
+limit nofile 102400 112640
 chdir /opt/opendaylight
 
 script
