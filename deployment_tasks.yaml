@@ -48,6 +48,15 @@
     puppet_manifest: puppet/manifests/odl-service.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
     timeout: 1400
+- id: odl_sfc
+  groups: ['primary-controller', 'controller']
+  requires: [odl_configure]
+  required_for: [neutron-configuration, openstack-haproxy, openstack-network-end]
+  type: puppet
+  parameters:
+    puppet_manifest: puppet/manifests/odl-sfc.pp
+    puppet_modules: puppet/modules:/etc/puppet/modules
+    timeout: 1400
 - id: openstack-network-common-config
   type: skipped
 - id: neutron-configuration
@@ -176,7 +185,6 @@
     puppet_manifest: puppet/manifests/odl-nol3-configure_default_route.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
     timeout: 3600
-
 
 # POST DEPLOYMENT
 - id: odl_dashboard_registration
