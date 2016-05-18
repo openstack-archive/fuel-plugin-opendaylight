@@ -53,6 +53,16 @@
     puppet_manifest: puppet/manifests/odl-service.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
     timeout: 1400
+- id: odl_sfc 
+  type: puppet
+  version: 2.0.0
+  groups: [primary-controller]
+  required_for: [openstack-network-common-config]
+  requires: [openstack-network-start]
+  parameters:
+    puppet_manifest: puppet/manifests/odl-sfc.pp
+    puppet_modules: puppet/modules:/etc/puppet/modules
+    timeout: 120
 - id: openstack-network-common-config
   type: puppet
   version: 2.0.0
