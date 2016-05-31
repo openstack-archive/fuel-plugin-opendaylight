@@ -147,7 +147,7 @@ function build_jarball() {
       fi
       mkdir -p ${DIR}/d
       sudo docker cp $container_id:${reporoot}/${niciart}/. ${DIR}/d
-      pushd ${DIR}/d
+      pushd ${DIR}/d/target
       bdart=$(echo ${JARBALL}-[0-9].[0-9].[0-9]-${ver}.jar)
       cp $bdart ${DIR}/${artexp}/
       popd
@@ -215,6 +215,16 @@ if [ "$ENA_NSH_SUB_PATCH" = true ] ; then
   jarpatch=$(echo ${DIR}/odl_package/nsh-pritesh-patch/${JARBALL}-*.jar)
   if [ ! -f "$jarpatch" ] ; then
     build_jarball $BUILD_FOR
+  else
+    pushd ${DIR}/d/target
+    bld=$(echo $ODLTAG | cut -d '/' -f 1)
+    if [ "$bld" == "release" ] ; then
+      ver=$(compute_ver $ODLTAG)
+    else
+      ver='SNAPSHOT'
+    fi
+    bdart=$(echo ${JARBALL}-[0-9].[0-9].[0-9]-${ver}.jar)
+    popd
   fi
   patch_odl
 fi
