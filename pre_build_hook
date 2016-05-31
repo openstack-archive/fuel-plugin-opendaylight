@@ -7,7 +7,7 @@ set -eux
 
 # Where we can find odl karaf distribution tarball
 # can be http(s) url or absolute path
-ODL_TARBALL_LOCATION=${ODL_TARBALL_LOCATION:-https://nexus.opendaylight.org/content/groups/public/org/opendaylight/integration/distribution-karaf/0.4.2-Beryllium-SR2/distribution-karaf-0.4.2-Beryllium-SR2.tar.gz}
+ODL_TARBALL_LOCATION=${ODL_TARBALL_LOCATION:-https://nexus.opendaylight.org/content/repositories/opendaylight.release/org/opendaylight/integration/distribution-karaf/0.4.1-Beryllium-SR1/distribution-karaf-0.4.1-Beryllium-SR1.tar.gz}
 JAVA8_URL=${JAVA8_URL:-https://launchpad.net/~openjdk-r/+archive/ubuntu/ppa/+files/openjdk-8-jre-headless_8u72-b15-1~trusty1_amd64.deb}
 
 #ODL openflowjava NSH subtype patch related
@@ -28,13 +28,13 @@ JARBALL=${JARBALL:-'openflowjava-extension-nicira'}
 bdart=''
 
 #Verion number used in deb/rpm package
-ODL_VERSION_NUMBER=${ODL_VERSION_NUMBER:-0.4.2}
+ODL_VERSION_NUMBER=${ODL_VERSION_NUMBER:-0.4.1}
 ODL_DESCRIPTION="OpenDaylight SDN Controller"
 TMP_NAME="karaf-odl.tar.gz"
 
 #Networking odl
 NETWORKING_ODL_REPO=${NETWORKING_ODL_REPO:-https://github.com/openstack/networking-odl.git}
-NETWORKING_ODL_BRANCH=${NETWORKING_ODL_BRANCH:-stable/mitaka}
+NETWORKING_ODL_BRANCH=${NETWORKING_ODL_BRANCH:-stable/liberty}
 
 #Opnfv-quagga-packaging
 OPNFV_QUAGGE_PACKAGING_REPO=${OPNFV_QUAGGE_PACKAGING_REPO:-https://github.com/nikolas-hermanns/opnfv-quagga-packaging}
@@ -147,7 +147,7 @@ function build_jarball() {
       fi
       mkdir -p ${DIR}/d
       sudo docker cp $container_id:${reporoot}/${niciart}/. ${DIR}/d
-      pushd ${DIR}/d
+      pushd ${DIR}/d/target
       bdart=$(echo ${JARBALL}-[0-9].[0-9].[0-9]-${ver}.jar)
       cp $bdart ${DIR}/${artexp}/
       popd
@@ -170,13 +170,6 @@ function patch_odl {
   cp $SRC $TARGET
 }
 
-function patch_networking_odl_deb {
-  if grep -q "neutron-lib>=0.1.0" $1
-  then
-    sed -i -e "s/neutron-lib>=0.1.0/neutron-lib>=0.0.1/" $1
-  fi
-}
-
 function build_pkg {
   case $1 in
     centos)
@@ -188,7 +181,6 @@ function build_pkg {
     ubuntu)
       pushd "${DIR}/repositories/${1}/"
       fpm --architecture all --force -s dir -t deb -m 'mskalski@mirantis.com' --version "${ODL_VERSION_NUMBER}" --description "${ODL_DESCRIPTION}" --prefix /opt/opendaylight --deb-upstart "${DIR}/odl_package/${1}/opendaylight" --after-install "${DIR}/odl_package/${1}/opendaylight-post" --name opendaylight -d "${JAVA_VERSION}" -C "${TMP_DIR}/opendaylight_src"
-      patch_networking_odl_deb ${TMP_DIR}/networking_odl/requirements.txt
       fpm --architecture all --force -s python -t deb -m 'mskalski@mirantis.com' --python-install-lib /usr/lib/python2.7/dist-packages ${TMP_DIR}/networking_odl/setup.py
       download_dependencies ${1}
       popd
@@ -223,6 +215,16 @@ if [ "$ENA_NSH_SUB_PATCH" = true ] ; then
   jarpatch=$(echo ${DIR}/odl_package/nsh-pritesh-patch/${JARBALL}-*.jar)
   if [ ! -f "$jarpatch" ] ; then
     build_jarball $BUILD_FOR
+  else
+    pushd ${DIR}/d/target
+    bld=$(echo $ODLTAG | cut -d '/' -f 1)
+    if [ "$bld" == "release" ] ; then
+      ver=$(compute_ver $ODLTAG)
+    else
+      ver='SNAPSHOT'
+    fi
+    bdart=$(echo ${JARBALL}-[0-9].[0-9].[0-9]-${ver}.jar)
+    popd
   fi
   patch_odl
 fi
