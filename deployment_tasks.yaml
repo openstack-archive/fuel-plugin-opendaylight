@@ -3,92 +3,118 @@
   role: [opendaylight]
   requires: [deploy_start]
   required_for: [deploy_end, primary-controller, controller]
-  tasks: [hiera, setup_repositories, fuel_pkgs, globals, tools, logging, odl_install]
+  tasks: [hiera, setup_repositories, fuel_pkgs, globals, tools, logging, netconfig, odl_install]
   parameters:
     strategy:
       type: parallel
+
 - id: odl_install
   type: puppet
-  version: 2.0.0
+  version: 2.1.0
   groups: [opendaylight]
   requires: [deploy_start]
   required_for: [openstack-network-start, odl_configure]
   requires: [hosts, firewall, globals, netconfig]
+  condition:
+    yaql_exp: changedAny($.network_metadata.vips.get('management'), $.opendaylight)
   parameters:
     puppet_manifest: puppet/manifests/odl-install.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
     timeout: 720
-- id: netconfig
-  type: puppet
-  version: 2.0.0
-  groups: [primary-controller, controller, cinder, cinder-block-device, cinder-vmware, compute, ceph-osd, primary-mongo, mongo, virt, ironic]
-  required_for: [deploy_end]
-  requires: [tools]
-  reexecute_on: [deploy_changes]
-  parameters:
-    puppet_manifest: puppet/manifests/odl-netconfig.pp
-    puppet_modules: puppet/modules:/etc/puppet/modules
-    timeout: 3600
-  test_pre:
-    cmd: ruby /etc/puppet/modules/osnailyfacter/modular/netconfig/netconfig_pre.rb
-  test_post:
-    cmd: ruby /etc/puppet/modules/osnailyfacter/modular/netconfig/netconfig_post.rb
+
 - id: hiera-override
   type: puppet
-  groups: ['primary-controller','controller','compute', 'opendaylight']
-  version: 2.0.0
+  groups: [primary-controller, controller, compute, opendaylight]
+  version: 2.1.0
   required_for: [netconfig]
   requires: [globals]
+  condition:
+    yaql_exp: >
+      changedAny($.network_metadata.vips.get('management'), $.quantum_settings,
+      $.opendaylight, $.neutron_advanced_configuration)
   parameters:
     puppet_manifest: puppet/manifests/hiera-override.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
     timeout: 120
+
 - id: odl_configure
-  groups: ['primary-controller', 'controller']
-  version: 2.0.0
+  type: puppet
+  version: 2.1.0
+  groups: [primary-controller, controller]
   requires: [deploy_start, primary-cluster-haproxy, cluster-haproxy]
   required_for: [openstack-network-common-config, openstack-haproxy, openstack-network-end]
-  type: puppet
+  cross-depends:
+    - name: odl_install
+  condition:
+    yaql_exp: >
+      changedAny($.network_metadata.vips, $.opendaylight,
+      $.network_metadata.nodes.values().where($.node_roles.contains('opendaylight')).network_roles.management)
   parameters:
     puppet_manifest: puppet/manifests/odl-service.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
     timeout: 1400
+
 - id: odl_sfc
   type: puppet
-  version: 2.0.0
+  version: 2.1.0
   groups: [primary-controller]
   required_for: [openstack-network-common-config]
   requires: [openstack-network-start]
+  condition:
+    yaql_exp: $.opendaylight.enable_sfc and changedAny($.network_metadata.vips.get('management'), $.opendaylight)
   parameters:
     puppet_manifest: puppet/manifests/odl-sfc.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
     timeout: 120
+
 - id: openstack-network-common-config
   type: puppet
-  version: 2.0.0
-  groups: [primary-controller,controller,compute]
+  version: 2.1.0
+  groups: [primary-controller, controller, compute]
   required_for: [openstack-network-end]
   requires: [openstack-network-start]
+  condition:
+    yaql_exp: >
+      changedAny($.opendaylight, $.get('openstack_network'), $.debug,
+      $.quantum_settings, $.neutron_advanced_configuration, $.rabbit,
+      $.ceilometer, $.network_scheme, $.get('use_syslog'),
+      $.get('use_stderr'), $.get('syslog_log_facility_neutron'),
+      $.network_metadata.nodes.values().where(
+        $.node_roles.any($.matches('controller'))).network_roles.select(
+          $.get('mgmt/messaging')),
+      $.get('amqp_hosts'), $.get('kombu_compression'))
   parameters:
     puppet_manifest: puppet/manifests/odl-common_config.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
     timeout: 1800
+
 - id: primary-openstack-network-plugins-l2
   type: puppet
-  version: 2.0.0
+  version: 2.1.0
   groups: [primary-controller]
   required_for: [openstack-network-end]
   requires: [openstack-network-start, openstack-network-common-config, openstack-network-server-config]
+  condition:
+    yaql_exp: &network_plugins_l2 >
+      changedAny($.configuration, $.fqdn, $.quantum_settings,
+      $.network_metadata.nodes.values().where($.node_roles.any($.matches('controller'))),
+      $.get('neutron_primary_controller_roles'), $.get('neutron_compute_nodes'),
+      $.network_metadata.vips.get('management'), $.get('service_endpoint'),
+      $.get('use_ssl'), $.get('region', 'RegionOne'), $.dpdk)
+  refresh_on: [neutron_agent_ovs]
   parameters:
     puppet_manifest: puppet/manifests/odl-ml2-configuration.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
     timeout: 1800
+
 - id: openstack-network-plugins-l2
   type: puppet
-  version: 2.0.0
-  groups: [controller,compute]
+  version: 2.1.0
+  groups: [controller, compute]
   required_for: [openstack-network-end]
   requires: [openstack-network-start, openstack-network-common-config, openstack-network-server-config]
+  condition:
+    yaql_exp: *network_plugins_l2
   cross-depends:
     - name: primary-openstack-network-plugins-l2
   parameters:
@@ -104,33 +130,38 @@
 # condition is added to tasks
 - id: primary-openstack-network-agents-l3
   type: puppet
-  version: 2.0.0
+  version: 2.1.0
   groups: [primary-controller]
   required_for: [openstack-network-end]
-  requires: [openstack-network-start, openstack-network-networks, openstack-network-routers, primary-openstack-network-plugins-l2, openstack-network-plugins-l2]
+  requires: [openstack-network-start, openstack-network-networks, openstack-network-routers, primary-openstack-network-plugins-l2]
   refresh_on: [neutron_l3_agent_config]
-  condition: "settings:opendaylight.enable_l3_odl == false"
-  parameters:
-    puppet_manifest: /etc/puppet/modules/openstack_tasks/examples/openstack-network/agents/l3.pp
-    puppet_modules: /etc/puppet/modules
-    timeout: 1800
-- id: openstack-network-agents-l3
-  type: puppet
-  version: 2.0.0
-  groups: [controller,compute]
-  required_for: [openstack-network-end]
-  requires: [openstack-network-start, openstack-network-networks, openstack-network-routers, primary-openstack-network-plugins-l2, openstack-network-plugins-l2]
-  refresh_on: [neutron_l3_agent_config]
-  condition: "settings:opendaylight.enable_l3_odl == false"
-  cross-depends:
-    - name: /(primary-)?openstack-network-plugins-l2/
-      role: ["/(primary-)?controller/"]
-    - name: primary-openstack-network-agents-l3
+  condition:
+    yaql_exp: &network_agents_l3 >
+      not $.opendaylight.enable_l3_odl and changedAny($.quantum, $.neutron_advanced_configuration,
+      $.get('neutron_controller_roles'), $.get('neutron_compute_nodes'),
+      $.debug, $.configuration, $.network_scheme,
+      ('primary-controller' in $.roles))
   parameters:
     puppet_manifest: /etc/puppet/modules/openstack_tasks/examples/openstack-network/agents/l3.pp
     puppet_modules: /etc/puppet/modules
     timeout: 1800
 
+- id: openstack-network-agents-l3
+  type: puppet
+  version: 2.1.0
+  groups: [controller, compute]
+  required_for: [openstack-network-end]
+  requires: [openstack-network-start, openstack-network-networks, openstack-network-routers, openstack-network-plugins-l2]
+  condition:
+    yaql_exp: *network_agents_l3
+  refresh_on: [neutron_l3_agent_config]
+  cross-depends:
+    - name: primary-openstack-network-plugins-l2
+    - name: primary-openstack-network-agents-l3
+  parameters:
+    puppet_manifest: /etc/puppet/modules/openstack_tasks/examples/openstack-network/agents/l3.pp
+    puppet_modules: /etc/puppet/modules
+    timeout: 1800
 
 # POST DEPLOYMENT
 # Additional task for routers when L3 HA is enabled
@@ -138,61 +169,80 @@
 - id: openstack-network-networks
   type: skipped
   groups: [primary-controller]
+
 - id: odl-openstack-network-networks
   type: puppet
-  version: 2.0.0
+  version: 2.1.0
   role: [primary-controller]
   required_for: [post_deployment_end]
   requires: [post_deployment_start]
+  condition:
+    yaql_exp: changedAny($.access, $.quantum_settings, $.quantum)
   parameters:
-    puppet_manifest: /etc/puppet/modules/osnailyfacter/modular/openstack-network/networks.pp
+    puppet_manifest: /etc/puppet/modules/openstack_tasks/examples/openstack-network/networks.pp
     puppet_modules: /etc/puppet/modules
     timeout: 1800
+
 - id: openstack-network-routers
   type: skipped
   groups: [primary-controller]
+
 - id: odl-openstack-network-routers
   type: puppet
-  version: 2.0.0
+  version: 2.1.0
   role: [primary-controller]
-  required_for: [post_deployment_end]
   requires: [post_deployment_start, odl-openstack-network-networks]
+  required_for: [post_deployment_end]
+  condition:
+    yaql_exp: >
+      not $.neutron_advanced_configuration.neutron_l3_ha and
+      changed($.neutron_advanced_configuration.neutron_l3_ha)
   parameters:
-    puppet_manifest: /etc/puppet/modules/osnailyfacter/modular/openstack-network/routers.pp
+    puppet_manifest: /etc/puppet/modules/openstack_tasks/examples/openstack-network/routers.pp
     puppet_modules: /etc/puppet/modules
     timeout: 1800
+
 - id: openstack-network-routers-ha
   type: puppet
-  version: 2.0.0
+  version: 2.1.0
   role: [primary-controller]
-  condition: "settings:neutron_advanced_configuration.neutron_l3_ha == true and settings:opendaylight.enable_l3_odl == false"
+  condition:
+    yaql_exp: >
+      not $.opendaylight.enable_l3_odl and
+      $.neutron_advanced_configuration.neutron_l3_ha and
+      changed($.neutron_advanced_configuration.neutron_l3_ha)
   required_for: [post_deployment_end]
   requires: [post_deployment_start]
   parameters:
     puppet_manifest: /etc/puppet/modules/openstack_tasks/examples/openstack-network/routers.pp
     puppet_modules: /etc/puppet/modules
     timeout: 1800
-    cwd: /
+
 - id: configure_default_route
   type: puppet
   version: 2.1.0
-  role: [primary-mongo, mongo, compute, compute-vmware, ceph-osd, cinder, cinder-vmware]
+  role: [primary-mongo, mongo]
   requires: [post_deployment_start]
   required_for: [post_deployment_end]
   condition:
     yaql_exp: >
-       (not $.opendaylight.enable_l3_odl) and
-       changedAny($.network_scheme, $.network_metadata.vips.management)
+       not $.opendaylight.enable_l3_odl and
+       changedAny($.network_scheme, $.network_metadata.vips.get('management'))
   parameters:
-    puppet_manifest: puppet/manifests/odl-nol3-configure_default_route.pp
-    puppet_modules: puppet/modules:/etc/puppet/modules
+    puppet_manifest: /etc/puppet/modules/osnailyfacter/modular/netconfig/configure_default_route.pp
+    puppet_modules: /etc/puppet/modules
     timeout: 3600
+
 - id: odl_dashboard_registration
   type: puppet
+  version: 2.1.0
   role: [primary-controller]
   required_for: [post_deployment_end]
   requires: [post_deployment_start]
-  version: 2.0.0
+  condition:
+    yaql_exp: >
+      changedAny($.deployment_id, $.master_ip, $.opendaylight,
+      $.network_metadata.vips.get('public', {}).get('ipaddr'))
   parameters:
     puppet_manifest: puppet/manifests/odl-dashboard.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
