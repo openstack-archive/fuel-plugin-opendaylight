@@ -9,8 +9,7 @@ setgid odl
 setuid odl
 
 env KARAF_HOME="/opt/opendaylight"
-env JAVA_HOME="/usr/lib/jvm/java-7-openjdk-amd64"
-env JAVA_OPTS="-server -Xms256M -Xmx2048M -XX:+UnlockDiagnosticVMOptions -XX:+UnsyncloadClass -XX:MaxPermSize=512M -Dcom.sun.management.jmxremote"
+env JAVA_OPTS="-server -Xms256M -Xmx2048M -XX:+UnlockDiagnosticVMOptions -XX:+UnsyncloadClass -Dcom.sun.management.jmxremote"
 env OPTS="-Dkaraf.startLocalConsole=false -Dkaraf.startRemoteShell=true"
 env MAIN="org.apache.karaf.main.Main"
 
@@ -21,6 +20,7 @@ script
   # Try to find lang used in system
   test -f /etc/default/locale && . /etc/default/locale || true
   export LANG=$LANG
+  export JAVA_HOME=$(readlink -f /usr/bin/java | sed "s:/jre/bin/java::")
   export KARAF_BASE="$KARAF_HOME"
   export KARAF_DATA="$KARAF_BASE/data"
   export KARAF_ETC="$KARAF_BASE/etc"
@@ -37,6 +37,6 @@ script
         fi
     done
 
-    exec /usr/bin/java $JAVA_OPTS -Djava.endorsed.dirs="${JAVA_ENDORSED_DIRS}" -Djava.ext.dirs="${JAVA_EXT_DIRS}" -Dkaraf.instances="${KARAF_HOME}/instances" -Dkaraf.home="$KARAF_HOME" -Dkaraf.base="$KARAF_BASE" -Dkaraf.data="$KARAF_DATA" -Dkaraf.etc="$KARAF_ETC" -Djava.io.tmpdir="$KARAF_DATA/tmp" -Djava.util.logging.config.file="$KARAF_BASE/etc/java.util.logging.properties" $KARAF_OPTS $OPTS -classpath "$CLASSPATH" $MAIN
+    exec ${JAVA_HOME}/bin/java $JAVA_OPTS -Djava.endorsed.dirs="${JAVA_ENDORSED_DIRS}" -Djava.ext.dirs="${JAVA_EXT_DIRS}" -Dkaraf.instances="${KARAF_HOME}/instances" -Dkaraf.home="$KARAF_HOME" -Dkaraf.base="$KARAF_BASE" -Dkaraf.data="$KARAF_DATA" -Dkaraf.etc="$KARAF_ETC" -Djava.io.tmpdir="$KARAF_DATA/tmp" -Djava.util.logging.config.file="$KARAF_BASE/etc/java.util.logging.properties" $KARAF_OPTS $OPTS -classpath "$CLASSPATH" $MAIN
 
 end script
