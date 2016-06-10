@@ -85,13 +85,6 @@ Build options
 
 It is possible to modify process of building plugin by setting environment variables. Look into [pre_build_hook file](pre_build_hook) for more details.
 
-Dependencies
-------------
-
-OpenDaylight use Java Runtime Environment, required packages will be downloaded from ubuntu repositores.
-Ubuntu trusty provides openjdk-7, export USE_JAVA8=true environment variable during plugin compilation to fetch
-openjdk-8. JAVA8_URL variable points to the localization of openjdk-8 deb package, default value is defined in
-[pre_build_hook file](pre_build_hook) file and can be overwritten by environment variable.
 
 Testing
 -------

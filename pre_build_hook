@@ -8,7 +8,6 @@ set -eux
 # Where we can find odl karaf distribution tarball
 # can be http(s) url or absolute path
 ODL_TARBALL_LOCATION=${ODL_TARBALL_LOCATION:-https://nexus.opendaylight.org/content/groups/public/org/opendaylight/integration/distribution-karaf/0.4.2-Beryllium-SR2/distribution-karaf-0.4.2-Beryllium-SR2.tar.gz}
-JAVA8_URL=${JAVA8_URL:-https://launchpad.net/~openjdk-r/+archive/ubuntu/ppa/+files/openjdk-8-jre-headless_8u72-b15-1~trusty1_amd64.deb}
 
 #ODL openflowjava NSH subtype patch related
 # The patch's TAG should mach with ODL release being patched
@@ -50,18 +49,8 @@ MODULES="${DIR}/deployment_scripts/puppet/modules"
 #Remove temporary files
 CLEANUP=${CLEANUP:-true}
 
-# If true openjdk-8 will be used
-USE_JAVA8=${USE_JAVA8:-false}
-if [ "$USE_JAVA8" = true ]
-then
-  JAVA_VERSION="openjdk-8-jre-headless"
-else
-  JAVA_VERSION="openjdk-7-jre-headless"
-fi
-
 function cleanup {
   rm -rf "${TMP_DIR}"
-  sed -i -e "s/java-8-openjdk-amd64/java-7-openjdk-amd64/" "${DIR}/odl_package/ubuntu/opendaylight"
 }
 
 function download {
@@ -88,15 +77,6 @@ function add_opnfv_quagga {
     popd
 
 }
-
-# Download packages required by ODL.
-function download_dependencies {
-  if [ "$USE_JAVA8" = true ]
-  then
-    wget -N "$JAVA8_URL"
-  fi
-}
-
 
 #
 #ODL patch related
@@ -182,15 +162,13 @@ function build_pkg {
     centos)
       pushd "${DIR}/repositories/${1}/"
       fpm --force -s dir -t rpm --version "${ODL_VERSION_NUMBER}" --description "${ODL_DESCRIPTION}" --prefix /opt/opendaylight --rpm-init "${DIR}/odl_package/${1}/opendaylight" --after-install "${DIR}/odl_package/${1}/opendaylight-post" --name opendaylight -d "java-1.7.0-openjdk" -C "${TMP_DIR}/opendaylight_src"
-      download_dependencies ${1}
       popd
       ;;
     ubuntu)
       pushd "${DIR}/repositories/${1}/"
-      fpm --architecture all --force -s dir -t deb -m 'mskalski@mirantis.com' --version "${ODL_VERSION_NUMBER}" --description "${ODL_DESCRIPTION}" --prefix /opt/opendaylight --deb-upstart "${DIR}/odl_package/${1}/opendaylight" --after-install "${DIR}/odl_package/${1}/opendaylight-post" --name opendaylight -d "${JAVA_VERSION}" -C "${TMP_DIR}/opendaylight_src"
+      fpm --architecture all --force -s dir -t deb -m 'mskalski@mirantis.com' --version "${ODL_VERSION_NUMBER}" --description "${ODL_DESCRIPTION}" --prefix /opt/opendaylight --deb-upstart "${DIR}/odl_package/${1}/opendaylight" --after-install "${DIR}/odl_package/${1}/opendaylight-post" --name opendaylight -d openjdk-8-jre-headless -C "${TMP_DIR}/opendaylight_src"
       patch_networking_odl_deb ${TMP_DIR}/networking_odl/requirements.txt
       fpm --architecture all --force -s python -t deb -m 'mskalski@mirantis.com' --python-install-lib /usr/lib/python2.7/dist-packages ${TMP_DIR}/networking_odl/setup.py
-      download_dependencies ${1}
       popd
       add_opnfv_quagga "${DIR}/repositories/${1}/"
       ;;
@@ -201,11 +179,6 @@ function build_pkg {
 command -v fpm >/dev/null 2>&1 || { echo >&2 "fpm ruby gem required but it's not installed.  Aborting."; exit 1; }
 
 cleanup
-
-if [ "$USE_JAVA8" = true ]
-then
-  sed -i -e "s/java-7-openjdk-amd64/java-8-openjdk-amd64/" "${DIR}/odl_package/ubuntu/opendaylight"
-fi
 
 mkdir -p "${TMP_DIR}"
 
