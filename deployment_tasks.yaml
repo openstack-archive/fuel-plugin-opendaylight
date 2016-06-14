@@ -22,45 +22,6 @@
     puppet_modules: puppet/modules:/etc/puppet/modules
     timeout: 720
 
-- id: netconfig
-  type: puppet
-  version: 2.1.0
-  groups: ['/.*/']
-  required_for: [deploy_end]
-  requires: [tools]
-  condition:
-    yaql_exp: >
-      changedAny($.network_scheme, $.dpdk, $.get('use_ovs'), $.get('set_rps'),
-      $.get('set_rps'), $.get('run_ping_checker'),
-      $.network_scheme.endpoints.values().where(
-        $.get('gateway') != null).gateway)
-  parameters:
-    puppet_manifest: puppet/manifests/odl-netconfig.pp
-    puppet_modules: puppet/modules:/etc/puppet/modules
-    timeout: 300
-  test_pre:
-    cmd: ruby /etc/puppet/modules/osnailyfacter/modular/netconfig/netconfig_pre.rb
-  test_post:
-    cmd: ruby /etc/puppet/modules/osnailyfacter/modular/netconfig/netconfig_post.rb
-  # Run netconfig task on all nodes (except mongo and vrouter VIP roles) after virtual_ips.
-  # Thus we make sure that our default gateway (vrouter VIP) is up before configuring
-  # routing on nodes.
-  cross-depends:
-    yaql_exp: >
-      switch(
-        (
-          $.roles.any($.matches('^(primary-)?(mongo)$'))
-          or ($.network_metadata.get('vips',{}).get('vrouter',{}).get('ipaddr') = null)
-          or (
-            len($.roles.toSet().intersect($.network_metadata.get('vips',{}).get('vrouter',{}).get('node_roles').toSet())) > 0
-          )
-        ) => [],
-        true => [{
-          name => 'virtual_ips',
-          role => $.network_metadata.get('vips',{}).get('vrouter',{}).get('node_roles')
-        }]
-      )
-
 - id: hiera-override
   type: puppet
   groups: [primary-controller, controller, compute, opendaylight]
@@ -108,7 +69,7 @@
 
 - id: odl_vxgpe
   type: puppet
-  version: 2.0.0
+  version: 2.1.0
   groups: [compute, compute-vmware]
   required_for: [openstack-network-common-config]
   requires: [openstack-network-start]
@@ -146,11 +107,11 @@
   requires: [openstack-network-start, openstack-network-common-config, openstack-network-server-config]
   condition:
     yaql_exp: &network_plugins_l2 >
-      changedAny($.configuration, $.fqdn, $.quantum_settings,
-        $.network_metadata.nodes.values().where($.node_roles.any($.matches('controller'))),
-        $.get('neutron_primary_controller_roles'), $.get('neutron_compute_nodes'),
-        $.network_metadata.vips.get('management'), $.get('use_ssl'),
-        $.get('region', 'RegionOne'), $.dpdk)
+      changedAny($.quantum, $.configuration, $.fqdn,
+      $.get('neutron_primary_controller_roles'),
+      $.get('neutron_compute_nodes'), $.quantum_settings, $.public_ssl,
+      $.get('use_ssl'), $.get('region'), $.network_scheme,
+      $.neutron_advanced_configuration)
   refresh_on: [neutron_agent_ovs]
   parameters:
     puppet_manifest: puppet/manifests/odl-ml2-configuration.pp
