@@ -67,7 +67,8 @@ module Puppet::Parser::Functions
     hiera_overrides['neutron_advanced_configuration'] = neutron_advanced_configuration
 
     # override network scheme
-    network_scheme = function_odl_network_scheme( [node_roles] )
+    orig_network_scheme = function_hiera_hash(['network_scheme'])
+    network_scheme = function_odl_network_scheme([odl['enable_bgpvpn'], orig_network_scheme])
 
     hiera_overrides['network_scheme'] = network_scheme
     # write to hiera override yaml file
