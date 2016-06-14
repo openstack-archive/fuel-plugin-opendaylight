@@ -17,7 +17,7 @@ Requirements
 
 | Requirement                      | Version/Comment |
 |----------------------------------|-----------------|
-| Mirantis OpenStack compatibility | 9.0             |
+| Mirantis OpenStack compatibility | 10.0            |
 
 Limitations
 -----------
