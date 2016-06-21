@@ -1,0 +1,35 @@
+From c18d93604c2ef28383afa5b0aa7d42e571306249 Mon Sep 17 00:00:00 2001
+From: Sam Hague <shague@redhat.com>
+Date: Wed, 18 May 2016 19:40:40 -0400
+Subject: [PATCH] use the right hop for more than one sf
+
+Change-Id: I87bdfb54faef2f73709aba2d4da7907f15837529
+Signed-off-by: Sam Hague <shague@redhat.com>
+---
+
+diff --git a/openstack/net-virt-sfc/impl/src/main/java/org/opendaylight/netvirt/openstack/netvirt/sfc/workaround/NetvirtSfcWorkaroundOF13Provider.java b/openstack/net-virt-sfc/impl/src/main/java/org/opendaylight/netvirt/openstack/netvirt/sfc/workaround/NetvirtSfcWorkaroundOF13Provider.java
+index 5ea5f02..0e28f97 100644
+--- a/openstack/net-virt-sfc/impl/src/main/java/org/opendaylight/netvirt/openstack/netvirt/sfc/workaround/NetvirtSfcWorkaroundOF13Provider.java
++++ b/openstack/net-virt-sfc/impl/src/main/java/org/opendaylight/netvirt/openstack/netvirt/sfc/workaround/NetvirtSfcWorkaroundOF13Provider.java
+@@ -204,10 +204,10 @@
+                 }
+ 
+                 ServiceFunction serviceFunction =
+-                        SfcProviderServiceFunctionAPI.readServiceFunction(firstHop.getServiceFunctionName());
++                        SfcProviderServiceFunctionAPI.readServiceFunction(hop.getServiceFunctionName());
+                 if (serviceFunction == null) {
+                     LOG.warn("handleRenderedServicePath: Could not identify ServiceFunction {} on {}",
+-                            firstHop.getServiceFunctionName().getValue(), bridgeNode);
++                            hop.getServiceFunctionName().getValue(), bridgeNode);
+                     continue;
+                 }
+                 ServiceFunctionForwarder serviceFunctionForwarder =
+@@ -215,7 +215,7 @@
+                                 .readServiceFunctionForwarder(hop.getServiceFunctionForwarder());
+                 if (serviceFunctionForwarder == null) {
+                     LOG.warn("handleRenderedServicePath: Could not identify ServiceFunctionForwarder {} on {}",
+-                            firstHop.getServiceFunctionName().getValue(), bridgeNode);
++                            hop.getServiceFunctionName().getValue(), bridgeNode);
+                     continue;
+                 }
+ 
