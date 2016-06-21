@@ -1,0 +1,20 @@
+diff --git a/sfcofl2/src/test/java/org/opendaylight/sfc/l2renderer/SfcL2FlowProgrammerTest.java b/sfcofl2/src/test/java/org/opendaylight/sfc/l2renderer/SfcL2FlowProgrammerTest.java
+index 1abe832..c349843 100644
+--- a/sfcofl2/src/test/java/org/opendaylight/sfc/l2renderer/SfcL2FlowProgrammerTest.java
++++ b/sfcofl2/src/test/java/org/opendaylight/sfc/l2renderer/SfcL2FlowProgrammerTest.java
+@@ -51,7 +51,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.ni
+ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.dst.choice.grouping.dst.choice.DstOfArpTpaCase;
+ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.nodes.node.table.flow.instructions.instruction.instruction.apply.actions._case.apply.actions.action.action.NxActionRegLoadNodesNodeTableFlowApplyActionsCase;
+ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.nodes.node.table.flow.instructions.instruction.instruction.apply.actions._case.apply.actions.action.action.NxActionRegMoveNodesNodeTableFlowApplyActionsCase;
+-import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.nodes.node.table.flow.instructions.instruction.instruction.apply.actions._case.apply.actions.action.action.NxActionSetNshc1NodesNodeTableFlowApplyActionsCase;
+ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.nodes.node.table.flow.instructions.instruction.instruction.write.actions._case.write.actions.action.action.NxActionResubmitNodesNodeTableFlowWriteActionsCase;
+ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxAugMatchNodesNodeTableFlow;
+ import org.powermock.api.mockito.PowerMockito;
+@@ -1038,7 +1037,6 @@ public class SfcL2FlowProgrammerTest {
+                 assertTrue(actions.get(1).getAction() instanceof NxActionRegMoveNodesNodeTableFlowApplyActionsCase);
+                 assertTrue(actions.get(2).getAction() instanceof NxActionRegMoveNodesNodeTableFlowApplyActionsCase);
+                 assertTrue(actions.get(3).getAction() instanceof NxActionRegMoveNodesNodeTableFlowApplyActionsCase);
+-                assertTrue(actions.get(4).getAction() instanceof NxActionSetNshc1NodesNodeTableFlowApplyActionsCase);
+                 assertTrue(actions.get(5).getAction() instanceof NxActionResubmitNodesNodeTableFlowWriteActionsCase);
+ 
+             }
