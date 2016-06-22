@@ -1,17 +1,15 @@
 class opendaylight::install (
   $rest_port = $opendaylight::rest_api_port,
   $bind_address = undef,
-) {
+) inherits opendaylight {
 
   $management_vip = hiera('management_vip')
-  $odl = hiera('opendaylight')
   $conf_dir = '/opt/opendaylight/etc'
   $jetty_port = $opendaylight::jetty_port
 
-  if $odl['enable_l3_odl'] {
-    $manage_l3_traffic = 'yes'
-  } else {
-    $manage_l3_traffic = 'no'
+  $manage_l3_traffic = $opendaylight::odl_settings['enable_l3_odl'] ? {
+    true    => 'yes',
+    default => 'no',
   }
 
   package { 'opendaylight':
@@ -57,7 +55,7 @@ class opendaylight::install (
 
   create_ini_settings($karaf_custom_properties, $karaf_custom_properties_file)
 
-  $enabled_features = odl_karaf_features()
+  $enabled_features = odl_karaf_features($opendaylight::odl_settings)
 
   ini_setting {'karaf_features':
     ensure            => present,

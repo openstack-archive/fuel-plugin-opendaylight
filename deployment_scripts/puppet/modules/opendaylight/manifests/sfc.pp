@@ -1,8 +1,9 @@
 class opendaylight::sfc {
     include opendaylight
+
     $management_vip = hiera('management_vip')
-    $odl = hiera('opendaylight')
-    $rest_port = $odl['rest_api_port']
+    $odl = $opendaylight::odl_settings
+    $rest_port = $opendaylight::rest_api_port
     $user = $odl['metadata']['default_credentials']['user']
     $password = $odl['metadata']['default_credentials']['password']
 
