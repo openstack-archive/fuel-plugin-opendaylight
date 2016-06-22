@@ -1,6 +1,6 @@
 module Puppet::Parser::Functions
-  newfunction(:odl_karaf_features, :type => :rvalue) do |args|
-    odl_settings = function_hiera(['opendaylight'])
+  newfunction(:odl_karaf_features, :arity => 1, :type => :rvalue) do |args|
+    odl_settings = args[0]
     features_set = odl_settings['metadata']['odl_features']
 
     enabled_features = []

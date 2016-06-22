@@ -1,11 +1,13 @@
 notice('MODULAR: odl-dashboard.pp')
 
+include opendaylight
+
 $cluster_id = hiera('deployment_id')
 $master_ip = hiera('master_ip')
 $network_metadata = hiera_hash('network_metadata', {})
 $os_public_vip = $network_metadata['vips']['public']['ipaddr']
-$odl = hiera('opendaylight')
-$port = $odl['metadata']['jetty_port']
+$odl = $opendaylight::odl_settings
+$port = $opendaylight::jetty_port
 $user = $odl['metadata']['default_credentials']['user']
 $password = $odl['metadata']['default_credentials']['password']
 

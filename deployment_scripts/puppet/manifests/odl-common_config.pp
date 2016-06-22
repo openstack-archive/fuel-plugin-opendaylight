@@ -2,9 +2,8 @@ notice('MODULAR: odl-common_config.pp')
 
 include opendaylight
 $use_neutron = hiera('use_neutron', false)
-$odl = hiera('opendaylight')
+$odl = $opendaylight::odl_settings
 $management_vip = hiera('management_vip')
-$odl_settings = hiera('opendaylight')
 $ovsdb_managers = odl_ovsdb_managers($opendaylight::odl_mgmt_ips)
 
 if $use_neutron {
@@ -13,7 +12,7 @@ if $use_neutron {
     ensure => installed,
   }
 
-  unless $odl_settings['enable_bgpvpn'] {
+  unless $odl['enable_bgpvpn'] {
     exec { 'ovs-set-manager':
       command => "ovs-vsctl set-manager $ovsdb_managers",
       path    => '/usr/bin'
@@ -110,7 +109,7 @@ if $use_neutron {
 
     # With bgpvpn feature enabled the connectivity to the outside world
     # is solved in another way.
-    unless $odl_settings['enable_bgpvpn'] {
+    unless $odl['enable_bgpvpn'] {
       if $ext_interface {
         exec { 'ovs-set-provider-mapping':
           command => "ovs-vsctl set Open_vSwitch $(ovs-vsctl show | head -n 1) other_config:provider_mappings=br-ex:${ext_interface}",
@@ -126,7 +125,7 @@ if $use_neutron {
     }
 
     # Setup the trunk end points. when the sdnvpn feature is activated this is needed.
-    if $odl_settings['enable_bgpvpn'] {
+    if $odl['enable_bgpvpn'] {
       $file_setupTEPs = '/tmp/setup_TEPs.py'
       file { $file_setupTEPs:
           ensure => file,

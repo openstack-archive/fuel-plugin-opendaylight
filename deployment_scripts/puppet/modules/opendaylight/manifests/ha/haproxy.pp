@@ -15,11 +15,12 @@
 #
 class opendaylight::ha::haproxy {
 
+  include opendaylight
+
   $public_vip = hiera('public_vip')
   $management_vip = hiera('management_vip')
-  $odl = hiera('opendaylight')
-  $api_port = $odl['rest_api_port']
-  $jetty_port = $odl['metadata']['jetty_port']
+  $api_port = $opendaylight::rest_api_port
+  $jetty_port = $opendaylight::jetty_port
 
   # defaults for any haproxy_service within this class
   Openstack::Ha::Haproxy_service {
