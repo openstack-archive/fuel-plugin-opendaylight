@@ -18,7 +18,8 @@ class opendaylight::install (
     ensure  => installed,
   }
 
-  package {'opnfv-quagga':
+  # quagga
+  package { ['opnfv-quagga', 'libcapnp', 'python-pycapnp', 'python-thriftpy']:
     ensure => installed,
   }
 
