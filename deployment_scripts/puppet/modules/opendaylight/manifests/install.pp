@@ -18,8 +18,9 @@ class opendaylight::install (
     ensure  => installed,
   }
 
-  package {'opnfv-quagga':
-    ensure => installed,
+  # quagga
+  class { 'opendaylight::quagga':
+    before => Service['opendaylight']
   }
 
   firewall {'215 odl':
