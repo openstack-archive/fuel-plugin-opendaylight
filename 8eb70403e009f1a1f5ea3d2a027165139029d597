@@ -1,0 +1,9 @@
+Code-Review+1: Alexandru Avadanii <alexandru.avadanii@enea.com>
+Code-Review+2: Michal Skalski <mskalski@mirantis.com>
+Workflow+1: Michal Skalski <mskalski@mirantis.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Wed, 29 Jun 2016 07:23:20 +0000
+Reviewed-on: https://review.openstack.org/330120
+Project: openstack/fuel-plugin-opendaylight
+Branch: refs/heads/master
