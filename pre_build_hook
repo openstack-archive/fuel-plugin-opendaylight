@@ -8,6 +8,7 @@ set -eux
 # Where we can find odl karaf distribution tarball
 # can be http(s) url or absolute path
 ODL_TARBALL_LOCATION=${ODL_TARBALL_LOCATION:-https://nexus.opendaylight.org/content/groups/public/org/opendaylight/integration/distribution-karaf/0.4.2-Beryllium-SR2/distribution-karaf-0.4.2-Beryllium-SR2.tar.gz}
+ODL_SFC_TARBALL_LOCATION=${ODL_SFC_TARBALL_LOCATION:-false}
 
 #ODL openflowjava NSH subtype patch related
 # The patch's TAG should mach with ODL release being patched
@@ -28,6 +29,7 @@ bdart=''
 
 #Verion number used in deb/rpm package
 ODL_VERSION_NUMBER=${ODL_VERSION_NUMBER:-0.4.2}
+ODL_SFC_VERSION_NUMBER=${ODL_SFC_VERSION_NUMBER:-0.5.0}
 ODL_DESCRIPTION="OpenDaylight SDN Controller"
 TMP_NAME="karaf-odl.tar.gz"
 
@@ -157,6 +159,16 @@ function patch_networking_odl_deb {
   fi
 }
 
+function get_karaf {
+  if [[ "$1" =~ ^http.* ]]
+  then
+    download $1 $2
+    unpack $2 $3
+  else
+    unpack $1 $3
+  fi
+}
+
 function build_pkg {
   case $1 in
     centos)
@@ -167,6 +179,9 @@ function build_pkg {
     ubuntu)
       pushd "${DIR}/repositories/${1}/"
       fpm --architecture all --force -s dir -t deb -m 'mskalski@mirantis.com' --version "${ODL_VERSION_NUMBER}" --description "${ODL_DESCRIPTION}" --prefix /opt/opendaylight --deb-upstart "${DIR}/odl_package/${1}/opendaylight" --after-install "${DIR}/odl_package/${1}/opendaylight-post" --name opendaylight -d openjdk-8-jre-headless -C "${TMP_DIR}/opendaylight_src"
+      if [ "$ODL_SFC_TARBALL_LOCATION" != false ] ; then
+        fpm --architecture all --force -s dir -t deb -m 'mskalski@mirantis.com' --version "${ODL_SFC_VERSION_NUMBER}" --description "${ODL_DESCRIPTION}" --prefix /opt/opendaylight --deb-upstart "${DIR}/odl_package/${1}/opendaylight" --after-install "${DIR}/odl_package/${1}/opendaylight-post" --name opendaylight-sfc -d openjdk-8-jre-headless -C "${TMP_DIR}/opendaylight_sfc_src"
+      fi
       patch_networking_odl_deb ${TMP_DIR}/networking_odl/requirements.txt
       fpm --architecture all --force -s python -t deb -m 'mskalski@mirantis.com' --python-install-lib /usr/lib/python2.7/dist-packages ${TMP_DIR}/networking_odl/setup.py
       popd
@@ -184,12 +199,10 @@ mkdir -p "${TMP_DIR}"
 
 pushd $TMP_DIR
 
-if [[ "$ODL_TARBALL_LOCATION" =~ ^http.* ]]
-then
-  download $ODL_TARBALL_LOCATION $TMP_NAME
-  unpack $TMP_NAME 'opendaylight_src'
-else
-  unpack $ODL_TARBALL_LOCATION 'opendaylight_src'
+get_karaf $ODL_TARBALL_LOCATION "karaf-odl.tar.gz" "opendaylight_src"
+
+if [ "$ODL_SFC_TARBALL_LOCATION" != false ] ; then
+  get_karaf $ODL_SFC_TARBALL_LOCATION "karaf-sfc-odl.tar.gz" "opendaylight_sfc_src"
 fi
 
 if [ "$ENA_NSH_SUB_PATCH" = true ] ; then
