@@ -6,13 +6,14 @@ class opendaylight::install (
   $management_vip = hiera('management_vip')
   $conf_dir = '/opt/opendaylight/etc'
   $jetty_port = $opendaylight::jetty_port
+  $odl_package = $opendaylight::package_name
 
   $manage_l3_traffic = $opendaylight::odl_settings['enable_l3_odl'] ? {
     true    => 'yes',
     default => 'no',
   }
 
-  package { 'opendaylight':
+  package { $odl_package:
     ensure  => installed,
   }
 
@@ -66,7 +67,7 @@ class opendaylight::install (
     value             => $enabled_features,
   }
 
-  Package['opendaylight'] ->
+  Package[$odl_package] ->
   Ini_setting <||> ->
   Firewall <||> ->
   File <||> ->
