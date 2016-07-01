@@ -170,6 +170,8 @@ function get_karaf {
 }
 
 function build_pkg {
+  # clean up
+  rm -rf ${DIR}/repositories/${1}/*
   case $1 in
     centos)
       pushd "${DIR}/repositories/${1}/"
