@@ -39,7 +39,7 @@ NETWORKING_ODL_BRANCH=${NETWORKING_ODL_BRANCH:-stable/mitaka}
 
 #Opnfv-quagga-packaging
 OPNFV_QUAGGE_PACKAGING_REPO=${OPNFV_QUAGGE_PACKAGING_REPO:-https://github.com/nikolas-hermanns/opnfv-quagga-packaging}
-OPNFV_QUAGGE_PACKAGING_BRANCH=stable/brahmaputra
+OPNFV_QUAGGE_PACKAGING_BRANCH=stable/colorado
 
 # For which systems odl package should be build
 BUILD_FOR=${BUILD_FOR:-ubuntu}
@@ -70,9 +70,9 @@ function add_opnfv_quagga {
         git clone $OPNFV_QUAGGE_PACKAGING_REPO opnfv-quagga
         pushd opnfv-quagga
             git checkout $OPNFV_QUAGGE_PACKAGING_BRANCH
-            if [ ! -e debian_package/*.deb ];then
+            if [ ! -e debian_package/ ];then
                 sudo apt-get -y install `cat requirements.txt`
-                make
+                make -j6
             fi
             cp debian_package/* $path
         popd
