@@ -158,6 +158,8 @@ function patch_networking_odl_deb {
 }
 
 function build_pkg {
+  # clean up
+  rm -rf ${DIR}/repositories/${1}/*
   case $1 in
     centos)
       pushd "${DIR}/repositories/${1}/"
