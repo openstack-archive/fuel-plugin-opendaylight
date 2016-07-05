@@ -1,0 +1,9 @@
+Code-Review+1: Nikolas Hermanns <nikolas.hermanns@ericsson.com>
+Code-Review+2: Michal Skalski <mskalski@mirantis.com>
+Workflow+1: Michal Skalski <mskalski@mirantis.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Tue, 05 Jul 2016 10:17:48 +0000
+Reviewed-on: https://review.openstack.org/337557
+Project: openstack/fuel-plugin-opendaylight
+Branch: refs/heads/master
