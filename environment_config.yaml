@@ -105,11 +105,8 @@ attributes:
         - odl-sfc-model
         - odl-sfc-provider
         - odl-sfc-provider-rest
-        - odl-sfc-sb-rest
-        - odl-sfc-ui
-        - odl-sfc-netconf
         - odl-sfc-ovs
-        - odl-sfcofl2
+        - odl-sfc-openflow-renderer 
       vpn:
         - odl-vpnservice-openstack
     default_credentials:
