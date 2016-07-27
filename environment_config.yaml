@@ -33,16 +33,16 @@ attributes:
     weight: 22
     type: "select"
     value: "opendaylight"
-    label: "Name of opendaylight deb package"
+    label: "OpenDayLight version to deploy"
     values:
       - data: "opendaylight"
-        label: "opendaylight"
+        label: "Beryllium"
       - data: "opendaylight-boron"
-        label: "opendaylight-boron"
+        label: "Boron (Experimental)"
     description:
       >
-       Plugin can be build with dedicated package for SFC.
-       Before choosing opendaylight-boron ensure that plugin include this package.
+       Plugin can be built with dedicated package for SFC.
+       Before choosing Boron ensure that plugin include this package.
     restrictions:
       - condition: "settings:opendaylight.enable_sfc.value == false"
         action: "hide"
@@ -105,11 +105,14 @@ attributes:
         - odl-sfc-model
         - odl-sfc-provider
         - odl-sfc-provider-rest
-        - odl-sfc-sb-rest
-        - odl-sfc-ui
-        - odl-sfc-netconf
         - odl-sfc-ovs
         - odl-sfcofl2
+      boron-sfc:
+        - odl-sfc-model
+        - odl-sfc-provider
+        - odl-sfc-provider-rest
+        - odl-sfc-ovs
+        - odl-sfc-openflow-renderer
       vpn:
         - odl-vpnservice-openstack
     default_credentials:
