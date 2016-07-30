@@ -63,6 +63,16 @@
     puppet_manifest: puppet/manifests/odl-sfc.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
     timeout: 120
+- id: odl_vxgpe
+  type: puppet
+  version: 2.0.0
+  groups: [compute, compute-vmware]
+  required_for: [openstack-network-common-config]
+  requires: [openstack-network-start]
+  parameters:
+    puppet_manifest: puppet/manifests/odl-vxgpe.pp
+    puppet_modules: puppet/modules:/etc/puppet/modules
+    timeout: 60
 - id: openstack-network-common-config
   type: puppet
   version: 2.0.0
