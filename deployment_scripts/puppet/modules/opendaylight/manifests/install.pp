@@ -6,7 +6,7 @@ class opendaylight::install (
   $management_vip = hiera('management_vip')
   $conf_dir = '/opt/opendaylight/etc'
   $jetty_port = $opendaylight::jetty_port
-  $odl_package = $opendaylight::package_name
+  $odl_package = odl_package_name($opendaylight::odl_settings)
 
   $manage_l3_traffic = $opendaylight::odl_settings['enable_l3_odl'] ? {
     true    => 'yes',
