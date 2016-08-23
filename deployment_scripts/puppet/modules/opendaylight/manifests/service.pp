@@ -8,16 +8,12 @@ class opendaylight::service {
 
   $rest_port = $opendaylight::rest_api_port
 
-  if $odl['enable_bgpvpn'] {
-    $odl_up_testing_site = "ovsdb:1"
-  } else {
-    $odl_up_testing_site = "netvirt:1"
   }
   if roles_include(['primary-controller']) {
     exec { 'wait-until-odl-ready':
       command   => join([
         "curl -o /dev/null --fail --silent --head -u ${user}:${password}",
-        "http://${management_vip}:${rest_port}/restconf/operational/network-topology:network-topology/topology/${odl_up_testing_site}"
+        "http://${management_vip}:${rest_port}/restconf/operational/network-topology:network-topology/topology/netvirt:1"
       ], ' '),
       path      => '/bin:/usr/bin',
       tries     => 60,
