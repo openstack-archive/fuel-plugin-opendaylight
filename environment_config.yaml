@@ -47,17 +47,6 @@ attributes:
       - condition: "settings:fuel-plugin-ovs == null or settings:fuel-plugin-ovs.metadata.enabled == false"
         strict: false
         message: "Openvswitch with NSH/DPDK (fuel-plugin-ovs) must be installed and enabled."
-  bgpvpn_gateway:
-    weight: 50
-    type: "text"
-    value: "0.0.0.0"
-    description: "Define the default gateway for BGPVPN"
-    label: "Default Gateway"
-    restrictions:
-        - settings:opendaylight.enable_bgpvpn.value == false: Only needed if BGPVPN is enabled.
-    regex:
-      source: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
-      error: 'Invalid ip number'
   odl_v2:
     weight: 60
     type: "checkbox"
@@ -95,19 +84,16 @@ attributes:
         - odl-ovsdb-sfc
         - odl-ovsdb-sfc-rest
       ovs:
-        - odl-ovsdb-openstack
+        - odl-netvirt-openstack
       sfc:
         - odl-sfc-model
         - odl-sfc-provider
         - odl-sfc-provider-rest
         - odl-sfc-ovs
         - odl-sfc-openflow-renderer
-      vpn:
-        - odl-vpnservice-openstack
     odl_deb: opendaylight
     experimental_odl_deb: opendaylight-experimental
     use_experimental_odl:
-      - enable_bgpvpn
     default_credentials:
       user: admin
       password: admin
