@@ -10,12 +10,7 @@ module Puppet::Parser::Functions
     odl = function_hiera(['opendaylight'])
     network_scheme = function_hiera(['network_scheme'])
 
-    if odl['enable_bgpvpn']
-      # If bgpvpn extensions are enabled br-ex is not needed
-      delete_bridges = ['br-prv', 'br-floating']
-    else
-      delete_bridges = ['br-prv']
-    end
+    delete_bridges = ['br-prv']
 
     debug "ODL network before transformation: #{network_scheme}"
 
@@ -57,11 +52,6 @@ module Puppet::Parser::Functions
       end
     else
       debug "Changing network_scheme for the bgpvpn case"
-      roles = network_scheme['roles']
-      roles['neutron/floating'] = 'None' if roles.has_key?('neutron/floating')
-      if endpoints.has_key? 'br-floating'
-         endpoints.delete 'br-floating'
-      end
       if endpoints.has_key? 'br-prv'
          endpoints.delete 'br-prv'
       end
