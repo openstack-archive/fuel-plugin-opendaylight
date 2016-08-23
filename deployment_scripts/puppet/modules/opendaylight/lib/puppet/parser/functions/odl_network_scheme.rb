@@ -58,7 +58,7 @@ module Puppet::Parser::Functions
     else
       debug "Changing network_scheme for the bgpvpn case"
       roles = network_scheme['roles']
-      roles['neutron/floating'] = 'None' if roles.has_key?('neutron/floating')
+      roles['neutron/floating'] = 'br-ex' if roles.has_key?('neutron/floating')
       if endpoints.has_key? 'br-floating'
          endpoints.delete 'br-floating'
       end
