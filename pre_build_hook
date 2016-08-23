@@ -19,7 +19,7 @@ fi
 # Where we can find odl karaf distribution tarball
 # can be http(s) url or absolute path
 ODL_TARBALL_LOCATION=${ODL_TARBALL_LOCATION:-https://nexus.opendaylight.org/content/groups/public/org/opendaylight/integration/distribution-karaf/0.5.0-Boron/distribution-karaf-0.5.0-Boron.tar.gz}
-ODL_EXPERIMENTAL_TARBALL_LOCATION=${ODL_EXPERIMENTAL_TARBALL_LOCATION:-https://nexus.opendaylight.org/content/repositories/public/org/opendaylight/integration/distribution-karaf/0.4.3-Beryllium-SR3/distribution-karaf-0.4.3-Beryllium-SR3.tar.gz}
+ODL_EXPERIMENTAL_TARBALL_LOCATION=${ODL_EXPERIMENTAL_TARBALL_LOCATION:-https://nexus.opendaylight.org/content/repositories/public/org/opendaylight/integration/distribution-karaf/0.5.1-Boron-SR1/distribution-karaf-0.5.1-Boron-SR1.tar.gz}
 ODL_EXPERIMENTAL_DEB_NAME=${ODL_EXPERIMENTAL_DEB_NAME:-opendaylight-experimental}
 
 #ODL openflowjava NSH subtype patch related
@@ -41,7 +41,7 @@ bdart=''
 
 #Verion number used in deb/rpm package
 ODL_VERSION_NUMBER=${ODL_VERSION_NUMBER:-0.5.0}
-ODL_EXPERIMENTAL_VERSION_NUMBER=${ODL_EXPERIMENTAL_VERSION_NUMBER:-0.4.3}
+ODL_EXPERIMENTAL_VERSION_NUMBER=${ODL_EXPERIMENTAL_VERSION_NUMBER:-0.5.1}
 ODL_DESCRIPTION="OpenDaylight SDN Controller"
 TMP_NAME="karaf-odl.tar.gz"
 

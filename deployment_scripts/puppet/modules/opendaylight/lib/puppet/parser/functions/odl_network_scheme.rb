@@ -57,6 +57,12 @@ module Puppet::Parser::Functions
       end
     else
       debug "Changing network_scheme for the bgpvpn case"
+      # don't push the same action more than one time
+      # because that will result in a duplicate resource declaration
+      patch_br_int_br_ex = {'action' => 'add-patch', 'bridges' => ['br-int', 'br-ex']}
+      if not transformations.include? patch_br_int_br_ex
+        transformations.push(patch_br_int_br_ex)
+      end
       roles = network_scheme['roles']
       roles['neutron/floating'] = 'None' if roles.has_key?('neutron/floating')
       if endpoints.has_key? 'br-floating'
