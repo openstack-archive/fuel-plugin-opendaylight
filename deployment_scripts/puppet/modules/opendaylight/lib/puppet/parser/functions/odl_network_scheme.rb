@@ -7,8 +7,8 @@
 module Puppet::Parser::Functions
   newfunction(:odl_network_scheme, :type => :rvalue) do |args|
     # override network_scheme
-    odl = function_hiera(['opendaylight'])
-    network_scheme = function_hiera(['network_scheme'])
+    odl = function_hiera_hash(['opendaylight'])
+    network_scheme = function_hiera_hash(['network_scheme'])
 
     if odl['enable_bgpvpn']
       # If bgpvpn extensions are enabled br-ex is not needed
