@@ -1,5 +1,12 @@
 class opendaylight::quagga (
 ){
+
+  firewall {'215 quagga':
+    dport  => 179,
+    proto  => 'tcp',
+    action => 'accept',
+  }
+
   package { ['opnfv-quagga', 'libcapnp-0.5.99', 'python-pycapnp', 'python-thriftpy']:
     ensure => installed,
   }
