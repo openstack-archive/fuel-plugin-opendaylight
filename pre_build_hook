@@ -4,7 +4,18 @@
 # like packages building, packages downloading from mirrors and so on.
 # The script should return 0 if there were no errors.
 set -eux
+CACHE=${CACHE:-false}
+RENEW=${RENEW:-false}
+DIR="$(dirname `readlink -f $0`)"
 
+if [ "$CACHE" == true ];then
+  export cache_dir=$DIR/.cache/;
+  if [ -e $cache_dir ] && [[ "$RENEW" == false ]];then
+    export OPNFV_QUAGGE_PACKAGING_REPO=$cache_dir/opnfv-quagga/;
+    export NETWORKING_ODL_REPO=$cache_dir/networking_odl/;
+    export ODL_TARBALL_LOCATION=$cache_dir/karaf-odl.tar.gz;
+  fi
+fi
 # Where we can find odl karaf distribution tarball
 # can be http(s) url or absolute path
 ODL_TARBALL_LOCATION=${ODL_TARBALL_LOCATION:-https://nexus.opendaylight.org/content/repositories/public/org/opendaylight/integration/distribution-karaf/0.4.3-Beryllium-SR3/distribution-karaf-0.4.3-Beryllium-SR3.tar.gz}
@@ -224,6 +235,14 @@ for system in $BUILD_FOR
 do
   build_pkg $system
 done
+
+if [ "$CACHE" == true ];then
+  if [ ! -e $cache_dir ] || [[ "$RENEW" == true ]];then
+    rm -rf $cache_dir
+    mkdir -p $cache_dir
+    cp -r ${DIR}/tmp/* $cache_dir/
+  fi
+fi
 
 if [ "$CLEANUP" != false ];then
   cleanup
