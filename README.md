@@ -41,13 +41,13 @@ OpenDaylight plugin installation
 3. Install the [fpm gem](https://github.com/jordansissel/fpm):
 
         gem install fpm
-    
+
 4. Build OpenDaylight Fuel plugin:
 
         fpb --build fuel-plugin-opendaylight/
 
 5. The *opendaylight-[x.x.x].rpm* plugin package will be created in the plugin folder.
-  
+
 6. Move this file to the Fuel Master node with secure copy (scp):
 
         scp opendaylight-[x.x.x].rpm root@<the_Fuel_Master_node_IP address>:/tmp
@@ -102,15 +102,19 @@ Known issues
 Development
 ===========
 
-The *OpenStack Development Mailing List* is the preferred way to communicate,
-emails should be sent to `openstack-dev@lists.openstack.org` with the subject
-prefixed by `[fuel][plugins][odl]`.
+Plugin is developed as a part of [FUEL@OPNFV project](https://wiki.opnfv.org/display/fuel/Fuel+Opnfv).
+
+If you have questions/suggestions you can find us on #opnfv-fuel freenode IRC channel.
+
+If you prefer email The *OpenStack Development Mailing List* `openstack-dev@lists.openstack.org`
+or *OPNFV Technical Discussion* `opnfv-tech-discuss@lists.opnfv.org` can be used.
+Subject should be prefixed by `[fuel][plugins][odl]`.
 
 Reporting Bugs
 --------------
 
-Bugs should be filled on the [Launchpad fuel-plugins project](
-https://bugs.launchpad.net/fuel-plugins) (not GitHub) with the tag `odl`.
+Bugs should be filled on the [Launchpad fuel-plugin-opendaylight project](
+https://bugs.launchpad.net/fuel-plugin-opendaylight/).
 
 
 Contributing
