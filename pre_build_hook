@@ -18,8 +18,9 @@ if [ "$CACHE" == true ];then
 fi
 # Where we can find odl karaf distribution tarball
 # can be http(s) url or absolute path
-ODL_TARBALL_LOCATION=${ODL_TARBALL_LOCATION:-https://nexus.opendaylight.org/content/repositories/public/org/opendaylight/integration/distribution-karaf/0.4.3-Beryllium-SR3/distribution-karaf-0.4.3-Beryllium-SR3.tar.gz}
-ODL_BORON_TARBALL_LOCATION=${ODL_BORON_TARBALL_LOCATION:-false}
+ODL_TARBALL_LOCATION=${ODL_TARBALL_LOCATION:-https://nexus.opendaylight.org/content/groups/public/org/opendaylight/integration/distribution-karaf/0.5.0-Boron/distribution-karaf-0.5.0-Boron.tar.gz}
+ODL_EXPERIMENTAL_TARBALL_LOCATION=${ODL_EXPERIMENTAL_TARBALL_LOCATION:-false}
+ODL_EXPERIMENTAL_DEB_NAME=${ODL_EXPERIMENTAL_DEB_NAME:-opendaylight-experimental}
 
 #ODL openflowjava NSH subtype patch related
 # The patch's TAG should mach with ODL release being patched
@@ -39,8 +40,8 @@ JARBALL=${JARBALL:-'openflowjava-extension-nicira'}
 bdart=''
 
 #Verion number used in deb/rpm package
-ODL_VERSION_NUMBER=${ODL_VERSION_NUMBER:-0.4.3}
-ODL_BORON_VERSION_NUMBER=${ODL_BORON_VERSION_NUMBER:-0.5.0}
+ODL_VERSION_NUMBER=${ODL_VERSION_NUMBER:-0.5.0}
+ODL_EXPERIMENTAL_VERSION_NUMBER=${ODL_EXPERIMENTAL_VERSION_NUMBER:-0.5.0}
 ODL_DESCRIPTION="OpenDaylight SDN Controller"
 TMP_NAME="karaf-odl.tar.gz"
 
@@ -192,8 +193,8 @@ function build_pkg {
     ubuntu)
       pushd "${DIR}/repositories/${1}/"
       fpm --architecture all --force -s dir -t deb -m 'mskalski@mirantis.com' --version "${ODL_VERSION_NUMBER}" --description "${ODL_DESCRIPTION}" --prefix /opt/opendaylight --deb-upstart "${DIR}/odl_package/${1}/opendaylight" --after-install "${DIR}/odl_package/${1}/opendaylight-post" --name opendaylight -d openjdk-8-jre-headless -C "${TMP_DIR}/opendaylight_src"
-      if [ "$ODL_BORON_TARBALL_LOCATION" != false ] ; then
-        fpm --architecture all --force -s dir -t deb -m 'mskalski@mirantis.com' --version "${ODL_BORON_VERSION_NUMBER}" --description "${ODL_DESCRIPTION}" --prefix /opt/opendaylight --deb-upstart "${DIR}/odl_package/${1}/opendaylight" --after-install "${DIR}/odl_package/${1}/opendaylight-post" --name opendaylight-boron -d openjdk-8-jre-headless -C "${TMP_DIR}/opendaylight_boron_src"
+      if [ "$ODL_EXPERIMENTAL_TARBALL_LOCATION" != false ] ; then
+        fpm --architecture all --force -s dir -t deb -m 'mskalski@mirantis.com' --version "${ODL_EXPERIMENTAL_VERSION_NUMBER}" --description "${ODL_DESCRIPTION}" --prefix /opt/opendaylight --deb-upstart "${DIR}/odl_package/${1}/opendaylight" --after-install "${DIR}/odl_package/${1}/opendaylight-post" --name "${ODL_EXPERIMENTAL_DEB_NAME}" -d openjdk-8-jre-headless -C "${TMP_DIR}/${ODL_EXPERIMENTAL_DEB_NAME}_src"
       fi
       patch_networking_odl_deb ${TMP_DIR}/networking_odl/requirements.txt
       fpm --architecture all --force -s python -t deb -m 'mskalski@mirantis.com' --python-install-lib /usr/lib/python2.7/dist-packages ${TMP_DIR}/networking_odl/setup.py
@@ -214,8 +215,8 @@ pushd $TMP_DIR
 
 get_karaf $ODL_TARBALL_LOCATION "karaf-odl.tar.gz" "opendaylight_src"
 
-if [ "$ODL_BORON_TARBALL_LOCATION" != false ] ; then
-  get_karaf $ODL_BORON_TARBALL_LOCATION "karaf-boron-odl.tar.gz" "opendaylight_boron_src"
+if [ "$ODL_EXPERIMENTAL_TARBALL_LOCATION" != false ] ; then
+  get_karaf $ODL_EXPERIMENTAL_TARBALL_LOCATION "karaf-experimental-odl.tar.gz" "${ODL_EXPERIMENTAL_DEB_NAME}_src"
 fi
 
 if [ "$ENA_NSH_SUB_PATCH" = true ] ; then
