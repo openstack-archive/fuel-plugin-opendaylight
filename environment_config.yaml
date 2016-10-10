@@ -107,6 +107,7 @@ attributes:
     odl_deb: opendaylight
     experimental_odl_deb: opendaylight-experimental
     use_experimental_odl:
+      - enable_bgpvpn
     default_credentials:
       user: admin
       password: admin
