@@ -11,7 +11,7 @@ fuel_version: ['9.0']
 # Specify license of your plugin
 licenses: ['Apache License Version 2.0']
 # Specify author or company name
-authors: ['Michal Skalski, Mirantis']
+authors: ['Michal Skalski', 'Nikolas Hermanns']
 # A link to the plugin's page
 homepage: 'https://github.com/openstack/fuel-plugin-opendaylight'
 # Specify a group which your plugin implements, possible options:
