@@ -108,7 +108,11 @@ $run_ping_checker = hiera('run_ping_checker', true)
 if $run_ping_checker {
     # check that network was configured successfully
     # and the default gateway is online
-    $default_gateway = hiera('default_gateway')
+    if hiera('default_gateway', false) {
+        $default_gateway = hiera('default_gateway')
+    } else {
+        $default_gateway = get_default_gateways()
+    }
 
     ping_host { $default_gateway :
         ensure => 'up',
