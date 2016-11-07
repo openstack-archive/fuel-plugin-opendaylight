@@ -36,9 +36,9 @@ attributes:
     label: "BGPVPN extensions"
     description:
       >
-        This enables the bgpvpn extension of neutron togethere with the
+        This enables the bgpvpn extension of neutron together with the
         corresponding sdnvpn features in odl. This feature will disable
-        the standart ovsdb feature from ODL.
+        the standard ovsdb feature from ODL.
     restrictions:
       - condition: "settings:bgpvpn == null or settings:bgpvpn.metadata.enabled == false"
         strict: false
@@ -47,6 +47,9 @@ attributes:
       - condition: "settings:fuel-plugin-ovs == null or settings:fuel-plugin-ovs.metadata.enabled == false"
         strict: false
         message: "Openvswitch with NSH/DPDK (fuel-plugin-ovs) must be installed and enabled."
+      - condition: "settings:opendaylight.enable_l3_odl.value == false"
+        strict: false
+        message: "OpenDayLight must be acting as the L3 controller for the bgpvpn features to be enabled."
   bgpvpn_gateway:
     weight: 50
     type: "text"
