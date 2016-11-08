@@ -1,0 +1,9 @@
+Code-Review+1: George Paraskevopoulos <geopar@intracom-telecom.com>
+Code-Review+2: Niko Hermanns <nikolas.hermanns@ericsson.com>
+Workflow+1: Niko Hermanns <nikolas.hermanns@ericsson.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Tue, 08 Nov 2016 08:04:04 +0000
+Reviewed-on: https://review.openstack.org/394538
+Project: openstack/fuel-plugin-opendaylight
+Branch: refs/heads/master
