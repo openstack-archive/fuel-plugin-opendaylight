@@ -14,6 +14,9 @@ if [ "$CACHE" == true ];then
     export OPNFV_QUAGGE_PACKAGING_REPO=$cache_dir/opnfv-quagga/;
     export NETWORKING_ODL_REPO=$cache_dir/networking_odl/;
     export ODL_TARBALL_LOCATION=$cache_dir/karaf-odl.tar.gz;
+    if [ -e $cache_dir/karaf-experimental-odl.tar.gz ];then
+        export ODL_EXPERIMENTAL_TARBALL_LOCATION=$cache_dir/karaf-experimental-odl.tar.gz
+    fi
   fi
 fi
 # Where we can find odl karaf distribution tarball
