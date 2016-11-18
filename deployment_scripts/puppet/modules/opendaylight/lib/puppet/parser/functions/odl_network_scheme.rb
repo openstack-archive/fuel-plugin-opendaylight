@@ -20,8 +20,8 @@ module Puppet::Parser::Functions
     transformations.delete_if { |action| action['action'] == 'add-patch' and not (action['bridges'] & delete_bridges).empty? }
     transformations.delete_if { |action| action['action'] == 'add-port' and delete_bridges.include?(action['bridge']) }
 
-    if not odl['enable_bgpvpn']
-      debug "Changing network_scheme for the non bgpvpn case."
+    if not odl['enable_netvirt']
+      debug "Changing network_scheme for the non netvirt case."
       # Modify only once
       if not endpoints.has_key? 'br-ex-lnx'
         transformations.each { |action| action['name'] = 'br-ex-lnx' if (action['action'] == 'add-br' and action['name'] == 'br-ex') }

@@ -103,7 +103,7 @@ if $use_neutron {
     $net_role_property = 'neutron/mesh'
     $tunneling_ip = get_network_role_property($net_role_property, 'ipaddr')
 
-    if $odl['enable_bgpvpn'] {
+    if $odl['enable_netvirt'] {
       exec { 'ovs-set-provider-mapping':
         command => "ovs-vsctl set Open_vSwitch $(ovs-vsctl show | head -n 1) other_config:provider_mappings=physnet1:br-floating",
         path    => '/usr/bin',
