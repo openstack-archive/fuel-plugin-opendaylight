@@ -4,7 +4,7 @@ class opendaylight::hiera_override {
 
   # override network scheme
   $orig_network_scheme = hiera_hash('network_scheme')
-  $network_scheme = odl_network_scheme($opendaylight::odl_settings['enable_bgpvpn'], $orig_network_scheme)
+  $network_scheme = odl_network_scheme($opendaylight::odl_settings['enable_netvirt'], $orig_network_scheme)
 
   odl_hiera_overrides(
     $override_file,

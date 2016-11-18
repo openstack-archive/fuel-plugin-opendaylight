@@ -29,6 +29,19 @@ attributes:
     restrictions:
       - condition: "settings:opendaylight.enable_sfc.value == false"
         action: "hide"
+  enable_netvirt:
+    weight: 25
+    type: "checkbox"
+    value: false
+    label: "Use the new OpenDaylight netvirt features"
+    description:
+      >
+        OpenDaylight provides the odl-netvirt-openstack feature that integrates
+        it with OpenStack. This is incompatible with ovsdb features, on which
+        some other features depend, such as SFC. NetVirt is a requirement for
+        features such as BGPVPN.
+    restrictions:
+      - settings:opendaylight.enable_sfc.value == true: SFC features cannot be enabled.
   enable_bgpvpn:
     weight: 40
     type: "checkbox"
@@ -53,6 +66,9 @@ attributes:
       - condition: "settings:opendaylight.enable_l3_odl.value == false"
         strict: false
         message: "OpenDayLight must be acting as the L3 controller for the bgpvpn features to be enabled."
+      - condition: "settings:opendaylight.enable_netvirt.value == false"
+        strict: false
+        message: "This feature requires NetVirt to be enabled."
   odl_v2:
     weight: 60
     type: "checkbox"

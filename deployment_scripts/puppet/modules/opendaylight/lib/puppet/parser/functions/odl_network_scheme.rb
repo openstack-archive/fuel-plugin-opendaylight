@@ -5,7 +5,7 @@ module Puppet::Parser::Functions
     bridges are used and both of them should be created on OVS.
 
     input:
-      <boolean> bgpvpn enabled or not
+      <boolean> netvirt enabled or not
       <hash> original network scheme
 
     output: overridden network scheme
@@ -13,7 +13,7 @@ module Puppet::Parser::Functions
     ENDHEREDOC
   ) do |args|
 
-    odl_bgpvpn_enabled, network_scheme = args
+    odl_netvirt_enabled, network_scheme = args
 
     # get original network scheme
     orig_endpoints = network_scheme['endpoints']
@@ -25,7 +25,6 @@ module Puppet::Parser::Functions
     roles           = {}
     transformations = []
 
-    # If bgpvpn extensions are enabled br-floating is not needed
     delete_bridges = ['br-prv']
 
     delete_bridges.each do |bridge|
@@ -51,7 +50,7 @@ module Puppet::Parser::Functions
       end
     end
 
-    if not odl_bgpvpn_enabled
+    if not odl_netvirt_enabled
       Puppet.debug 'Changing network_scheme for the non bgpvpn case'
 
       BRIDGE_MAPPING = {
