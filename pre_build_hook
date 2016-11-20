@@ -1,250 +1,59 @@
 #!/bin/bash
-
-# Add here any the actions which are required before plugin build
-# like packages building, packages downloading from mirrors and so on.
-# The script should return 0 if there were no errors.
 set -eux
-CACHE=${CACHE:-false}
-RENEW=${RENEW:-false}
-DIR="$(dirname `readlink -f $0`)"
+USE_CACHE=${USE_CACHE:-true}
+ODL_INTEGRATION_PACKAGING=${ODL_INTEGRATION_PACKAGING:-https://github.com/opendaylight/integration-packaging}
 
-if [ "$CACHE" == true ];then
-  export cache_dir=$DIR/.cache/;
-  if [ -e $cache_dir ] && [[ "$RENEW" == false ]];then
-    export OPNFV_QUAGGE_PACKAGING_REPO=$cache_dir/opnfv-quagga/;
-    export NETWORKING_ODL_REPO=$cache_dir/networking_odl/;
-    export ODL_TARBALL_LOCATION=$cache_dir/karaf-odl.tar.gz;
-  fi
-fi
-# Where we can find odl karaf distribution tarball
-# can be http(s) url or absolute path
-ODL_TARBALL_LOCATION=${ODL_TARBALL_LOCATION:-https://nexus.opendaylight.org/content/groups/public/org/opendaylight/integration/distribution-karaf/0.5.0-Boron/distribution-karaf-0.5.0-Boron.tar.gz}
-ODL_EXPERIMENTAL_TARBALL_LOCATION=${ODL_EXPERIMENTAL_TARBALL_LOCATION:-https://nexus.opendaylight.org/content/repositories/public/org/opendaylight/integration/distribution-karaf/0.5.1-Boron-SR1/distribution-karaf-0.5.1-Boron-SR1.tar.gz}
-ODL_EXPERIMENTAL_DEB_NAME=${ODL_EXPERIMENTAL_DEB_NAME:-opendaylight-experimental}
-
-#ODL openflowjava NSH subtype patch related
-# The patch's TAG should mach with ODL release being patched
-# Normally it is release/beryllium-sr1 for ditribution-karaf-0.4.1-Beryllium-SR1.tar.gz
-#                release/beryllium-sr2 for ditribution-karaf-0.4.2-Beryllium-SR2.tar.gz
-#                stable/beryllium      for ditribution-karaf-0.4.x-SNAPSHOT.tar.gz
-# The patch should be explicitly enabled, since its build time is 1 hour and only applies
-# while the openvswitch in fuel-plugin-ovs is not compatible with the actual openflow
-# implementation of OpenDayLight. There is a possibility to build the patch separately
-# and put into folder odl_package/nsh-pritesh-patch. Remember checking the file's naming
-# in this case. If the plugin encounters the supplied jarball it wont build itself but
-# will try using the supplied one.
-ENA_NSH_SUB_PATCH=${ENA_NSH_SUB_PATCH:-false}
-REPO=${REPO:-'openflowplugin'}
-ODLTAG=${ODLTAG:-'release/beryllium-sr2'}
-JARBALL=${JARBALL:-'openflowjava-extension-nicira'}
-bdart=''
-
-#Verion number used in deb/rpm package
-ODL_VERSION_NUMBER=${ODL_VERSION_NUMBER:-0.5.0}
-ODL_EXPERIMENTAL_VERSION_NUMBER=${ODL_EXPERIMENTAL_VERSION_NUMBER:-0.5.1}
-ODL_DESCRIPTION="OpenDaylight SDN Controller"
-TMP_NAME="karaf-odl.tar.gz"
+#ODL versions to build, separated by space
+#Taken from https://github.com/opendaylight/integration-packaging/blob/master/deb/build_vars.yaml
+ODL_VERSIONS=${ODL_VERSIONS:-5.1.0.1 5.0.0.1}
 
 #Networking odl
-NETWORKING_ODL_REPO=${NETWORKING_ODL_REPO:-https://github.com/openstack/networking-odl.git}
-NETWORKING_ODL_BRANCH=${NETWORKING_ODL_BRANCH:-stable/mitaka}
-
-#Opnfv-quagga-packaging
-OPNFV_QUAGGE_PACKAGING_REPO=${OPNFV_QUAGGE_PACKAGING_REPO:-https://github.com/nikolas-hermanns/opnfv-quagga-packaging}
-OPNFV_QUAGGE_PACKAGING_BRANCH=stable/colorado
-
-# For which systems odl package should be build
-BUILD_FOR=${BUILD_FOR:-ubuntu}
+NETWORKING_ODL_REPO=${NETWORKING_ODL_REPO:-http://ubuntu-cloud.archive.canonical.com/ubuntu/pool/main/n/networking-odl/}
+NETWORKING_ODL_DEB=${NETWORKING_ODL_DEB:-python-networking-odl_2.0.1~git20160926.416a5c7-0ubuntu1~cloud0_all.deb}
 
 DIR="$(dirname `readlink -f $0`)"
-TMP_DIR="${DIR}/tmp"
-MODULES="${DIR}/deployment_scripts/puppet/modules"
+CACHE_DIR="${DIR}/.cache"
+CACHE_DEB_DIR="${CACHE_DIR}/integration-packaging/deb/cache"
 
-#Remove temporary files
-CLEANUP=${CLEANUP:-true}
-
-function cleanup {
-  rm -rf "${TMP_DIR}"
-}
-
-function download {
-  wget "$1" -qO $2
-}
-
-function unpack {
-  mkdir "${TMP_DIR}/${2}"
-  tar xzf $1 --strip-components=1 -C "${TMP_DIR}/${2}"
-}
-
-function add_opnfv_quagga {
-    path=$1
-    pushd ${TMP_DIR}
-        git clone $OPNFV_QUAGGE_PACKAGING_REPO opnfv-quagga
-        pushd opnfv-quagga
-            git checkout $OPNFV_QUAGGE_PACKAGING_BRANCH
-            if [ ! -e debian_package/ ];then
-                sudo apt-get -y install `cat requirements.txt`
-                make -j6
-            fi
-            cp debian_package/* $path
-        popd
-    popd
-
-}
-
-#
-#ODL patch related
-function putbldenv() {
-  cat >env.sh <<EOF
-#!bin/bash
-REPO=${REPO}
-ODLTAG=${ODLTAG}
-EOF
-}
-
-function compute_ver() {
-  local ret=''
-  local rel=''
-  local amm=''
-
-  local tag=$(echo $1 | cut -d '/' -f 2)
-  if  [ "$tag" != "${tag/-/}" ]; then
-    rel=$(echo $tag | cut -d '-' -f 1 | sed 's/.*/\u&/')
-    amm=$(echo $tag | cut -d '-' -f 2 | tr '[:lower:]' '[:upper:]')
-    ret="${rel}-${amm}"
-  else
-    rel=$(echo $tag | sed 's/.*/\u&/')
-    ret="${rel}"
+function prep_build_env {
+  docker_build_opts="-t odl_deb"
+  if [ "$USE_CACHE" != true  ] || [ ! -d "${CACHE_DIR}/integration-packaging" ] ;then
+    rm -rf ${CACHE_DIR}/integration-packaging
+    git clone ${ODL_INTEGRATION_PACKAGING} ${CACHE_DIR}/integration-packaging
+    docker_build_opts+=" --no-cache"
   fi
-  echo $ret
+  docker build ${docker_build_opts} ${CACHE_DIR}/integration-packaging/deb
 }
 
-function build_jarball() {
-  local reporoot="/root/${REPO}"
-  local  niciart="extension/${JARBALL}/target"
-  local   artexp="odl_package/nsh-pritesh-patch"
-  local      bld=''
-  local      ver=''
-
-  case $1 in
-    ubuntu)
-      pushd ${DIR}/ofjavansh
-      putbldenv
-      wget -N https://raw.githubusercontent.com/opendaylight/odlparent/stable/beryllium/settings.xml
-      sudo docker build -t ofjavansh .
-      container_id=$(sudo docker run  -d ofjavansh)
-      bld=$(echo $ODLTAG | cut -d '/' -f 1)
-      if [ "$bld" == "release" ] ; then
-	ver=$(compute_ver $ODLTAG)
-      else
-        ver='SNAPSHOT'
-      fi
-      mkdir -p ${DIR}/d
-      sudo docker cp $container_id:${reporoot}/${niciart}/. ${DIR}/d
-      pushd ${DIR}/d
-      bdart=$(echo ${JARBALL}-[0-9].[0-9].[0-9]-${ver}.jar)
-      cp $bdart ${DIR}/${artexp}/
-      popd
-      sudo rm -rf ${DIR}/d
-      popd
-      ;;
-    *)
-      echo "Not supported system"
-      exit 1
-      ;;
-  esac
+function build_odl_deb {
+  docker run -u $(id -u) --rm -v ${CACHE_DIR}/integration-packaging/deb:/build odl_deb -v ${1//./ }
+  rm -rf ${CACHE_DIR}/integration-packaging/deb/opendaylight
 }
 
-function patch_odl {
-  local artexp="odl_package/nsh-pritesh-patch"
-  local TARBASE="opendaylight_src/system/org/opendaylight/openflowplugin/openflowjava-extension-nicira"
-  local    SRC="${DIR}/${artexp}/${bdart}"
-  echo "patching..."
-  TARGET=$(echo ${TMP_DIR}/${TARBASE}/*/${bdart})
-  cp $SRC $TARGET
+function in_cache {
+  [ -f "${CACHE_DEB_DIR}/${1}" ]
 }
 
-function patch_networking_odl_deb {
-  if grep -q "neutron-lib>=0.1.0" $1
-  then
-    sed -i -e "s/neutron-lib>=0.1.0/neutron-lib>=0.0.1/" $1
-  fi
+function copy_from_cache {
+  cp ${CACHE_DEB_DIR}/${1} ${DIR}/repositories/ubuntu/${1}
 }
 
-function get_karaf {
-  if [[ "$1" =~ ^http.* ]]
-  then
-    download $1 $2
-    unpack $2 $3
-  else
-    unpack $1 $3
-  fi
-}
+command -v docker >/dev/null 2>&1 || { echo >&2 "Docker is required but it's not installed.  Aborting."; exit 1; }
 
-function build_pkg {
-  # clean up
-  rm -rf ${DIR}/repositories/${1}/*
-  case $1 in
-    centos)
-      pushd "${DIR}/repositories/${1}/"
-      fpm --force -s dir -t rpm --version "${ODL_VERSION_NUMBER}" --description "${ODL_DESCRIPTION}" --prefix /opt/opendaylight --rpm-init "${DIR}/odl_package/${1}/opendaylight" --after-install "${DIR}/odl_package/${1}/opendaylight-post" --name opendaylight -d "java-1.7.0-openjdk" -C "${TMP_DIR}/opendaylight_src"
-      popd
-      ;;
-    ubuntu)
-      pushd "${DIR}/repositories/${1}/"
-      fpm --architecture all --force -s dir -t deb -m 'mskalski@mirantis.com' --version "${ODL_VERSION_NUMBER}" --description "${ODL_DESCRIPTION}" --prefix /opt/opendaylight --deb-upstart "${DIR}/odl_package/${1}/opendaylight" --after-install "${DIR}/odl_package/${1}/opendaylight-post" --name opendaylight -d openjdk-8-jre-headless -C "${TMP_DIR}/opendaylight_src"
-      if [ "$ODL_EXPERIMENTAL_TARBALL_LOCATION" != false ] ; then
-        fpm --architecture all --force -s dir -t deb -m 'mskalski@mirantis.com' --version "${ODL_EXPERIMENTAL_VERSION_NUMBER}" --description "${ODL_DESCRIPTION}" --prefix /opt/opendaylight --deb-upstart "${DIR}/odl_package/${1}/opendaylight" --after-install "${DIR}/odl_package/${1}/opendaylight-post" --name "${ODL_EXPERIMENTAL_DEB_NAME}" -d openjdk-8-jre-headless -C "${TMP_DIR}/${ODL_EXPERIMENTAL_DEB_NAME}_src"
-      fi
-      patch_networking_odl_deb ${TMP_DIR}/networking_odl/requirements.txt
-      fpm --architecture all --force -s python -t deb -m 'mskalski@mirantis.com' --python-install-lib /usr/lib/python2.7/dist-packages ${TMP_DIR}/networking_odl/setup.py
-      popd
-      add_opnfv_quagga "${DIR}/repositories/${1}/"
-      ;;
-    *) echo "Not supported system"; exit 1;;
-  esac
-}
+mkdir -p "${CACHE_DIR}"
+prep_build_env
+rm -f ${DIR}/repositories/ubuntu/*.deb
 
-command -v fpm >/dev/null 2>&1 || { echo >&2 "fpm ruby gem required but it's not installed.  Aborting."; exit 1; }
-
-cleanup
-
-mkdir -p "${TMP_DIR}"
-
-pushd $TMP_DIR
-
-get_karaf $ODL_TARBALL_LOCATION "karaf-odl.tar.gz" "opendaylight_src"
-
-if [ "$ODL_EXPERIMENTAL_TARBALL_LOCATION" != false ] ; then
-  get_karaf $ODL_EXPERIMENTAL_TARBALL_LOCATION "karaf-experimental-odl.tar.gz" "${ODL_EXPERIMENTAL_DEB_NAME}_src"
-fi
-
-if [ "$ENA_NSH_SUB_PATCH" = true ] ; then
-  jarpatch=$(echo ${DIR}/odl_package/nsh-pritesh-patch/${JARBALL}-*.jar)
-  if [ ! -f "$jarpatch" ] ; then
-    build_jarball $BUILD_FOR
-  fi
-  patch_odl
-fi
-
-git clone $NETWORKING_ODL_REPO networking_odl
-pushd networking_odl
-git checkout $NETWORKING_ODL_BRANCH
-popd
-
-for system in $BUILD_FOR
+for v in $ODL_VERSIONS
 do
-  build_pkg $system
+  deb_name="opendaylight_${v%.*}-${v##*.}_all.deb"
+  if ! in_cache $deb_name ;then
+    build_odl_deb $v
+  fi
+  copy_from_cache $deb_name
 done
 
-if [ "$CACHE" == true ];then
-  if [ ! -e $cache_dir ] || [[ "$RENEW" == true ]];then
-    rm -rf $cache_dir
-    mkdir -p $cache_dir
-    cp -r ${DIR}/tmp/* $cache_dir/
-  fi
+if ! in_cache $NETWORKING_ODL_DEB ;then
+  wget -O ${CACHE_DEB_DIR}/${NETWORKING_ODL_DEB} ${NETWORKING_ODL_REPO}/${NETWORKING_ODL_DEB}
 fi
-
-if [ "$CLEANUP" != false ];then
-  cleanup
-fi
+copy_from_cache $NETWORKING_ODL_DEB

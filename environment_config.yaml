@@ -68,6 +68,30 @@ attributes:
     regex:
       source: ^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$
       error: 'Invalid port number'
+  java_min_mem:
+    value: '1g'
+    label: 'Java -Xms option'
+    description: 'Initial memory allocation pool.'
+    weight: 80
+    type: "text"
+  java_max_mem:
+    value: '2g'
+    label: 'Java -Xmx option'
+    description: 'Maximum memory allocation pool.'
+    weight: 81
+    type: "text"
+  java_extra_opts:
+    value: '-XX:+UseG1GC'
+    label: 'Java extra options'
+    description: 'Additional options.'
+    weight: 82
+    type: "text"
+  deb_version:
+    value: '5.1.0-1'
+    label: 'OpenDaylight package version'
+    description: 'Plugin can be build with more than one version of ODL.'
+    weight: 90
+    type: "text"
   metadata:
     restrictions:
       - "cluster:net_provider != 'neutron'": "Only neutron is supported by OpenDaylight"
@@ -99,10 +123,6 @@ attributes:
         - odl-sfc-provider-rest
         - odl-sfc-ovs
         - odl-sfc-openflow-renderer
-    odl_deb: opendaylight
-    experimental_odl_deb: opendaylight-experimental
-    use_experimental_odl:
-      - enable_bgpvpn
     default_credentials:
       user: admin
       password: admin
