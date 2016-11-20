@@ -1,6 +1,0 @@
-#!/bin/sh
-set -e
-
-adduser --system --home /opt/opendaylight --shell /sbin/nologin odl
-/sbin/chkconfig --add opendaylight
-chown -R odl:odl /opt/opendaylight
