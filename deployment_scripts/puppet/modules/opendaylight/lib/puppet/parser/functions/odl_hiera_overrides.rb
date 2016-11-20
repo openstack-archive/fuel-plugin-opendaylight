@@ -28,20 +28,25 @@ module Puppet::Parser::Functions
     # Without this floating IPs doesn't work.
     # This option will be no longer used in Mitaka release.
     # Must be changed before that!
-    l3_agent =  {'neutron_l3_agent_config' =>
-                  {'DEFAULT/external_network_bridge' =>
-                    {'value' => 'br-ex'}
-                  }
-                }
+    l3_agent =  {
+      'neutron_l3_agent_config' => {
+        'DEFAULT/external_network_bridge' => {'value' => 'br-ex'},
+        'ovs/ovsdb_interface' => {'value' => 'vsctl'}
+      }
+    }
 
     # When L3 forward is enabled in odl there is no neutron l3 agent
     # which normally proxy request to metadata agent. Dhcp agent can
     # takeover this task
-    dhcp_agent =  {'neutron_dhcp_agent_config' =>
-                    {'DEFAULT/force_metadata' =>
-                      {'value' => true}
-                    }
-                  }
+    # Use vsctl ovsdb interface instead of native which is default
+    # since Newton release. Using older interface prevents neutron
+    # from switching ovs to listen in passive mode (ptcp:6640)
+    dhcp_agent =  {
+      'neutron_dhcp_agent_config' => {
+        'DEFAULT/force_metadata' => {'value' => true},
+        'ovs/ovsdb_interface' => {'value' => 'vsctl'}
+      }
+    }
 
     configuration.merge! ml2_plugin
     configuration.merge! l3_agent
