@@ -38,25 +38,21 @@ OpenDaylight plugin installation
 
         pip install fuel-plugin-builder
 
-3. Install the [fpm gem](https://github.com/jordansissel/fpm):
-
-        gem install fpm
-
-4. Build OpenDaylight Fuel plugin:
+3. Build OpenDaylight Fuel plugin:
 
         fpb --build fuel-plugin-opendaylight/
 
-5. The *opendaylight-[x.x.x].rpm* plugin package will be created in the plugin folder.
+4. The *opendaylight-[x.x.x].rpm* plugin package will be created in the plugin folder.
 
-6. Move this file to the Fuel Master node with secure copy (scp):
+5. Move this file to the Fuel Master node with secure copy (scp):
 
         scp opendaylight-[x.x.x].rpm root@<the_Fuel_Master_node_IP address>:/tmp
 
-7. While logged in Fuel Master install the OpenDaylight plugin:
+6. While logged in Fuel Master install the OpenDaylight plugin:
 
         fuel plugins --install opendaylight-[x.x.x].rpm
 
-8. Check if the plugin was installed successfully:
+7. Check if the plugin was installed successfully:
 
         fuel plugins
 
@@ -64,7 +60,7 @@ OpenDaylight plugin installation
         ---|--------------|---------|----------------
         1  | opendaylight | 0.5.2   | 2.0.0
 
-9. Plugin is ready to use and can be enabled on the Settings tab of the Fuel web UI.
+8. Plugin is ready to use and can be enabled on the Settings tab of the Fuel web UI.
 
 
 User Guide
@@ -75,7 +71,7 @@ OpenDaylight plugin configuration
 
 1. Create a new environment with the Fuel UI wizard.
 2. Click on the Settings tab of the Fuel web UI.
-3. Select "OpenDaylight plugin" section.
+3. Select "OpenDaylight plugin" section in "Other" tab.
 4. Tick the checkbox and click "Save Settings" button.
 5. Assign role OPENDAYLIGHT to one of the node.
 
@@ -84,6 +80,9 @@ Build options
 -------------
 
 It is possible to modify process of building plugin by setting environment variables. Look into [pre_build_hook file](pre_build_hook) for more details.
+For example include 2 versions of opendaylight controller in plugin:
+
+        ODL_VERSIONS="5.1.0.1 5.0.0.1" fpb --build fuel-plugin-opendaylight/
 
 
 Testing
