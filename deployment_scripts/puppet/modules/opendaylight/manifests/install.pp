@@ -6,20 +6,33 @@ class opendaylight::install (
   $management_vip = hiera('management_vip')
   $conf_dir = '/opt/opendaylight/etc'
   $jetty_port = $opendaylight::jetty_port
-  $odl_package = odl_package_name($opendaylight::odl_settings)
+  $odl_package = $opendaylight::odl_settings['deb_version']
+  $java_min_mem = $opendaylight::odl_settings['java_min_mem']
+  $java_max_mem = $opendaylight::odl_settings['java_max_mem']
+  $java_extra_opts = $opendaylight::odl_settings['java_extra_opts']
 
   $manage_l3_traffic = $opendaylight::odl_settings['enable_l3_odl'] ? {
     true    => 'yes',
     default => 'no',
   }
 
-  package { $odl_package:
-    ensure  => installed,
+  package { 'opendaylight':
+    ensure  => $odl_package,
   }
 
-  # quagga
-  class { 'opendaylight::quagga':
-    before => Service['opendaylight']
+  #Temporary solution until number of allowed open files
+  #will be fixed in main systemd service file
+  file {'/etc/systemd/system/opendaylight.service.d':
+    ensure => directory,
+  } ->
+  file {'/etc/systemd/system/opendaylight.service.d/override.conf':
+    ensure  => file,
+    content => template('opendaylight/override.conf.erb'),
+  } ~>
+  exec {'systemctl-daemon-reload':
+    refreshonly => true,
+    command => 'systemctl daemon-reload',
+    path        => ['/bin', '/user/bin'],
   }
 
   firewall {'215 odl':
@@ -40,6 +53,12 @@ class opendaylight::install (
     owner   => 'odl',
     content => template('opendaylight/jetty.xml.erb')
   }
+  file { '/opt/opendaylight/bin/setenv':
+    ensure  => file,
+    owner   => 'odl',
+    mode    => '0755',
+    content => template('opendaylight/setenv.erb')
+  }
 
   $karaf_custom_properties_file = {
     'path' => "${conf_dir}/custom.properties",
@@ -48,8 +67,6 @@ class opendaylight::install (
   }
   $karaf_custom_properties = {
     '' => {
-      'of.address' => $bind_address,
-      'of.listenPort' => '6653',
       'ovsdb.of.version' => '1.3',
       'ovsdb.l3.fwd.enabled' => $manage_l3_traffic,
     }
@@ -68,9 +85,9 @@ class opendaylight::install (
     value             => $enabled_features,
   }
 
-  Package[$odl_package] ->
+  Package['opendaylight'] ->
   Ini_setting <||> ->
   Firewall <||> ->
-  File <||> ->
+  File <||> ~>
   Service['opendaylight']
 }
