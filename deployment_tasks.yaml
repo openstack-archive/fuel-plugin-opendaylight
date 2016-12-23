@@ -26,8 +26,8 @@
   type: puppet
   groups: [primary-controller, controller, compute, opendaylight]
   version: 2.1.0
-  required_for: [netconfig]
-  requires: [globals]
+  required_for: [primary-openstack-network-plugins-l2, openstack-network-plugins-l2]
+  requires: [openstack-network-common-config]
   condition:
     yaql_exp: >
       changedAny($.network_metadata.vips.get('management'), $.quantum_settings,
@@ -104,7 +104,7 @@
   version: 2.1.0
   groups: [primary-controller]
   required_for: [openstack-network-end]
-  requires: [openstack-network-start, openstack-network-common-config, openstack-network-server-config]
+  requires: [openstack-network-start, openstack-network-common-config, primary-openstack-network-server-config]
   condition:
     yaql_exp: &network_plugins_l2 >
       changedAny($.quantum, $.configuration, $.fqdn,
