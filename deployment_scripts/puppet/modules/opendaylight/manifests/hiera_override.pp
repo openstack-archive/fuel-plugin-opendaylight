@@ -14,4 +14,12 @@ class opendaylight::hiera_override {
     $network_scheme,
     hiera('management_vip')
   )
+
+  $neutron_dirs = [ '/etc/neutron/', '/etc/neutron/plugins', '/etc/neutron/plugins/ml2' ]
+  file { $neutron_dirs:
+    ensure => directory,
+    owner  => root,
+    group  => root,
+    mode   => 0644,
+  }
 }
