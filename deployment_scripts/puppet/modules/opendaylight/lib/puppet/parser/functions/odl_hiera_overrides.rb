@@ -1,7 +1,7 @@
 require 'yaml'
 
 module Puppet::Parser::Functions
-  newfunction(:odl_hiera_overrides, :arity => 6) do |args|
+  newfunction(:odl_hiera_overrides, :type => :rvalue, :arity => 6) do |args|
 
     filename, odl, neutron_config, neutron_advanced_configuration, network_scheme, mgmt_vip = args
 
@@ -49,6 +49,7 @@ module Puppet::Parser::Functions
     configuration.merge! l3_agent
     configuration.merge! dhcp_agent
     hiera_overrides['configuration'] = configuration
+    hiera_overrides['configuration_options'] = { 'create' => false }
 
     # override neutron_config/quantum_settings
     neutron_config['L2']['mechanism_drivers'] = 'opendaylight'
@@ -64,7 +65,7 @@ module Puppet::Parser::Functions
     hiera_overrides['neutron_advanced_configuration'] = neutron_advanced_configuration
 
     hiera_overrides['network_scheme'] = network_scheme
-    # write to hiera override yaml file
-    File.open(filename, 'w') { |file| file.write(hiera_overrides.to_yaml) }
+
+    return hiera_overrides.to_yaml
   end
 end

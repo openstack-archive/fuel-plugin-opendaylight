@@ -6,7 +6,7 @@ class opendaylight::hiera_override {
   $orig_network_scheme = hiera_hash('network_scheme')
   $network_scheme = odl_network_scheme($opendaylight::odl_settings['enable_bgpvpn'], $orig_network_scheme)
 
-  odl_hiera_overrides(
+  $odl_hiera_yaml = odl_hiera_overrides(
     $override_file,
     $opendaylight::odl_settings,
     hiera('neutron_config'),
@@ -14,4 +14,11 @@ class opendaylight::hiera_override {
     $network_scheme,
     hiera('management_vip')
   )
+
+  file { $override_file:
+    ensure  => present,
+    owner   => 'root',
+    group   => 'root',
+    content => $odl_hiera_yaml,
+  }
 }

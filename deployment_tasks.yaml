@@ -22,7 +22,21 @@
     puppet_modules: puppet/modules:/etc/puppet/modules
     timeout: 720
 
-- id: hiera-override
+# We remove override file, because 'odl_hiera_override' task is not reenterant and
+# cannot correctly handled data on subsequent calls
+- id: odl_remove_hiera
+  type: shell
+  groups: [primary-controller, controller, compute, opendaylight]
+  required_for: [odl_hiera_override]
+  condition:
+    yaql_exp: >
+      changedAny($.network_metadata.vips.get('management'), $.quantum_settings,
+      $.opendaylight, $.neutron_advanced_configuration)
+  parameters:
+    cmd: rm -f /etc/hiera/plugins/opendaylight.yaml
+    timeout: 5
+
+- id: odl_hiera_override
   type: puppet
   groups: [primary-controller, controller, compute, opendaylight]
   version: 2.1.0

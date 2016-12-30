@@ -3,6 +3,15 @@ notice('MODULAR: odl-ml2.pp')
 class neutron {}
 class { 'neutron' :}
 
+$override_configuration = hiera_hash(configuration, {})
+$override_configuration_options = { create => true }
+
+override_resources { 'odl-ml2-override':
+  configuration => $override_configuration,
+  options       => $override_configuration_options,
+}
+
+
 include ::neutron::params
 
 $node_name = hiera('node_name')
@@ -36,6 +45,9 @@ $auth_endpoint_type = 'internalURL'
 # Synchronize database after plugin was configured
 if $primary_controller {
   include ::neutron::db::sync
+
+  Override_resources['odl-ml2-override'] -> Exec['neutron-db-sync']
+
   notify{"Trigger neutron-db-sync": } ~> Exec['neutron-db-sync']
 }
 
