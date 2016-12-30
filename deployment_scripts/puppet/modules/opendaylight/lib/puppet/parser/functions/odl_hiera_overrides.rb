@@ -1,9 +1,9 @@
 require 'yaml'
 
 module Puppet::Parser::Functions
-  newfunction(:odl_hiera_overrides, :arity => 6) do |args|
+  newfunction(:odl_hiera_overrides, :type => :rvalue, :arity => 5) do |args|
 
-    filename, odl, neutron_config, neutron_advanced_configuration, network_scheme, mgmt_vip = args
+    odl, neutron_config, neutron_advanced_configuration, network_scheme, mgmt_vip = args
 
     hiera_overrides = {}
     configuration = {}
@@ -26,8 +26,7 @@ module Puppet::Parser::Functions
     # Must be changed before that!
     l3_agent =  {
       'neutron_l3_agent_config' => {
-        'DEFAULT/external_network_bridge' => {'value' => 'br-ex'},
-        'ovs/ovsdb_interface' => {'value' => 'vsctl'}
+        'DEFAULT/external_network_bridge' => {'value' => 'br-ex'}
       }
     }
 
@@ -40,15 +39,22 @@ module Puppet::Parser::Functions
     # https://bugs.launchpad.net/neutron/+bug/1614766
     dhcp_agent =  {
       'neutron_dhcp_agent_config' => {
-        'DEFAULT/force_metadata' => {'value' => true},
-        'ovs/ovsdb_interface' => {'value' => 'vsctl'}
+        'DEFAULT/force_metadata' => {'value' => true}
+      }
+    }
+
+    neutron_ovs_config = {
+      'neutron_config' => {
+        'OVS/ovsdb_interface' => {'value' => 'vsctl'}
       }
     }
 
     configuration.merge! ml2_plugin
     configuration.merge! l3_agent
     configuration.merge! dhcp_agent
+    configuration.merge! neutron_ovs_config
     hiera_overrides['configuration'] = configuration
+    hiera_overrides['configuration_options'] = { 'create' => false }
 
     # override neutron_config/quantum_settings
     neutron_config['L2']['mechanism_drivers'] = 'opendaylight'
@@ -64,7 +70,7 @@ module Puppet::Parser::Functions
     hiera_overrides['neutron_advanced_configuration'] = neutron_advanced_configuration
 
     hiera_overrides['network_scheme'] = network_scheme
-    # write to hiera override yaml file
-    File.open(filename, 'w') { |file| file.write(hiera_overrides.to_yaml) }
+
+    return hiera_overrides.to_yaml
   end
 end
