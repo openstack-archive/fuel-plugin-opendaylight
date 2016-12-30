@@ -49,6 +49,7 @@ module Puppet::Parser::Functions
     configuration.merge! l3_agent
     configuration.merge! dhcp_agent
     hiera_overrides['configuration'] = configuration
+    hiera_overrides['configuration_options'] = { 'create' => false }
 
     # override neutron_config/quantum_settings
     neutron_config['L2']['mechanism_drivers'] = 'opendaylight'
