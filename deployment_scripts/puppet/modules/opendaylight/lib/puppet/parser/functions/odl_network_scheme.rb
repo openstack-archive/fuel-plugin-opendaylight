@@ -9,6 +9,7 @@ module Puppet::Parser::Functions
     # override network_scheme
     odl = function_hiera(['opendaylight'])
     network_scheme = function_hiera(['network_scheme'])
+    dpdk_enabled = function_hiera(['dpdk', {}])['enabled']
 
     if odl['enable_bgpvpn']
       # If bgpvpn extensions are enabled br-ex is not needed
@@ -41,7 +42,7 @@ module Puppet::Parser::Functions
 
       roles = network_scheme['roles']
       roles.each { |role,bridge| roles[role] = 'br-ex-lnx' if bridge == 'br-ex' }
-      roles['neutron/private'] = 'br-aux' if roles.has_key?('neutron/private')
+      roles['neutron/private'] = 'br-aux' if roles.has_key?('neutron/private') && !dpdk_enabled
       roles['neutron/floating'] = 'br-ex' if roles.has_key?('neutron/floating')
 
       if endpoints.has_key? 'br-ex' and not endpoints.has_key? 'br-ex-lnx'
@@ -52,7 +53,7 @@ module Puppet::Parser::Functions
          endpoints['br-ex'] = endpoints.delete 'br-floating'
       end
 
-      if endpoints.has_key? 'br-prv'
+      if endpoints.has_key? 'br-prv' && !dpdk_enabled
          endpoints['br-aux'] = endpoints.delete 'br-prv'
       end
     else
