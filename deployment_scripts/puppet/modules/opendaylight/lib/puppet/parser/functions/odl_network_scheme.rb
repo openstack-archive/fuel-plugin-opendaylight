@@ -9,6 +9,7 @@ module Puppet::Parser::Functions
     # override network_scheme
     odl = function_hiera(['opendaylight'])
     network_scheme = function_hiera(['network_scheme'])
+    dpdk_enabled = function_hiera_hash(['dpdk', {}])['enabled']
 
     if odl['enable_bgpvpn']
       # If bgpvpn extensions are enabled br-ex is not needed
@@ -21,9 +22,17 @@ module Puppet::Parser::Functions
 
     endpoints = network_scheme['endpoints']
     transformations = network_scheme['transformations']
-    transformations.delete_if { |action| action['action'] == 'add-br' and delete_bridges.include?(action['name']) }
-    transformations.delete_if { |action| action['action'] == 'add-patch' and not (action['bridges'] & delete_bridges).empty? }
-    transformations.delete_if { |action| action['action'] == 'add-port' and delete_bridges.include?(action['bridge']) }
+
+    if dpdk_enabled
+      transformations.each do |action|
+        action['name'] = 'br-aux' if 'add-br' == action['action'] && delete_bridges.include?(action['name'])
+        action['bridge'] = 'br-aux' if 'add-port' == action['action'] && delete_bridges.include?(action['bridge'])
+      end
+    else
+      transformations.delete_if { |action| action['action'] == 'add-br' and delete_bridges.include?(action['name']) }
+      transformations.delete_if { |action| action['action'] == 'add-patch' and not (action['bridges'] & delete_bridges).empty? }
+      transformations.delete_if { |action| action['action'] == 'add-port' and delete_bridges.include?(action['bridge']) }
+    end
 
     if not odl['enable_bgpvpn']
       debug "Changing network_scheme for the non bgpvpn case."
