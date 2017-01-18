@@ -44,12 +44,6 @@ attributes:
         strict: false
         message: "BGPVPN (fuel-plugin-bgpvpn) plugin must be installed and enabled."
       - networking_parameters:segmentation_type == 'vlan': This feature works only with segmentation_type != vlan
-      - condition: "settings:fuel-plugin-ovs == null or settings:fuel-plugin-ovs.metadata.enabled == false"
-        strict: false
-        message: "Openvswitch with NSH/DPDK (fuel-plugin-ovs) must be installed and enabled."
-      - condition: "settings:fuel-plugin-ovs == null or settings:fuel-plugin-ovs.install_on_controller.value == false"
-        strict: false
-        message: "Openvswitch with NSH/DPDK (fuel-plugin-ovs) must be installed and it needs to be installed on the controller as well."
       - condition: "settings:opendaylight.enable_l3_odl.value == false"
         strict: false
         message: "OpenDayLight must be acting as the L3 controller for the bgpvpn features to be enabled."
