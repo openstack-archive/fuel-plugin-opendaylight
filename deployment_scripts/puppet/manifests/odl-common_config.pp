@@ -90,15 +90,21 @@ if $use_neutron {
   if $segmentation_type == 'vlan' {
     $net_role_property    = 'neutron/private'
 
+    $br_name = $opendaylight::dpdk_opts['enabled'] ? {
+      true    => 'br-prv',
+      default => 'br-aux',
+    }
+
+
     if $ext_interface {
       exec { 'ovs-set-provider-mapping':
-        command => "ovs-vsctl set Open_vSwitch $(ovs-vsctl show | head -n 1) other_config:provider_mappings=br-ex:${ext_interface},physnet2:br-aux",
+        command => "ovs-vsctl set Open_vSwitch $(ovs-vsctl show | head -n 1) other_config:provider_mappings=br-ex:${ext_interface},physnet2:${br_name}",
         path    => '/usr/bin',
         require => Exec['ovs-set-manager'],
       }
     } else {
       exec { 'ovs-set-provider-mapping':
-        command => "ovs-vsctl set Open_vSwitch $(ovs-vsctl show | head -n 1) other_config:provider_mappings=physnet2:br-aux",
+        command => "ovs-vsctl set Open_vSwitch $(ovs-vsctl show | head -n 1) other_config:provider_mappings=physnet2:${br_name}",
         path    => '/usr/bin',
         require => Exec['ovs-set-manager'],
       }
