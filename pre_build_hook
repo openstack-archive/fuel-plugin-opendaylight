@@ -7,7 +7,7 @@ ODL_INTEGRATION_PACKAGING=${ODL_INTEGRATION_PACKAGING:-https://github.com/openda
 # Taken from https://github.com/opendaylight/integration-packaging/blob/master/deb/build_vars.yaml
 # If more than one version of ODL are included make sure that local
 # fpb contain this commit https://review.openstack.org/#/c/311031/
-ODL_VERSIONS=${ODL_VERSIONS:-5.0.0.1}
+ODL_VERSIONS=${ODL_VERSIONS:-5.0.0.1 5.2.0.1}
 
 #Networking odl
 NETWORKING_ODL_REPO=${NETWORKING_ODL_REPO:-http://ubuntu-cloud.archive.canonical.com/ubuntu/pool/main/n/networking-odl/}
