@@ -9,10 +9,17 @@ module Puppet::Parser::Functions
     configuration = {}
 
     mechanism_driver = odl['odl_v2'] ? 'opendaylight_v2' : 'opendaylight'
+    # The list of drivers that can be enabled can be found here
+    # https://github.com/openstack/networking-odl/blob/master/devstack/settings#L79
+    # or https://github.com/openstack/networking-odl/commit/9aab23a3c3fd8aa7ade1e8edc150dd24ee3f5948
+    # In Newton by default dns and port_security are enabled, but networking-odl doesn't support dns,
+    # and because of that floating IPs cannot be assigned. So we disable dns here.
+    extension_drivers = 'port_security'
 
     ml2_plugin = {
       'neutron_plugin_ml2' => {
         'ml2/mechanism_drivers' => {'value' => mechanism_driver},
+        'ml2/extension_drivers' => {'value' => 'port_security'}
         'ml2_odl/password' => {'value' => 'admin'},
         'ml2_odl/username' => {'value' => 'admin'},
         'ml2_odl/url' => {'value' => "http://#{mgmt_vip}:#{odl['rest_api_port']}/controller/nb/v2/neutron"}
