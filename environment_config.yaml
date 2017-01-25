@@ -25,7 +25,7 @@ attributes:
     description:
       >
        Classifier determines what traffic needs to be chained based on policy based on yang model.
-       The OpenDayLight actually supports the OVSDB NetVirt and the GBP classifier in case of SFC.
+       The OpenDaylight actually supports the OVSDB NetVirt and the GBP classifier in case of SFC.
     restrictions:
       - condition: "settings:opendaylight.enable_sfc.value == false"
         action: "hide"
@@ -46,7 +46,10 @@ attributes:
       - networking_parameters:segmentation_type == 'vlan': This feature works only with segmentation_type != vlan
       - condition: "settings:opendaylight.enable_l3_odl.value == false"
         strict: false
-        message: "OpenDayLight must be acting as the L3 controller for the bgpvpn features to be enabled."
+        message: "OpenDaylight must be acting as the L3 controller for the bgpvpn features to be enabled."
+      - condition: "settings:opendaylight.deb_version.value != '5.2.0-1'"
+        strict: false
+        message: "The BGPVPN features only support OpenDaylight 5.2.0-1. The OpenDaylight package version field must be set to that value."
   odl_v2:
     weight: 60
     type: "checkbox"
@@ -83,7 +86,7 @@ attributes:
   deb_version:
     value: '5.0.0-1'
     label: 'OpenDaylight package version'
-    description: 'Plugin can be build with more than one version of ODL.'
+    description: 'Plugin can be built with more than one version of ODL.'
     weight: 90
     type: "text"
   metadata:
