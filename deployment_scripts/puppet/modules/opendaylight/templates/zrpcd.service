@@ -1,0 +1,11 @@
+[Unit]
+Description=ZRPC daemon for quagga
+After=network.service
+
+[Service]
+ExecStart=/opt/quagga/sbin/zrpcd
+Type=simple
+PIDFile=/var/run/zrpcd.pid
+
+[Install]
+WantedBy=default.target

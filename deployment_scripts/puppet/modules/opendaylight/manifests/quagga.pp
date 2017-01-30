@@ -1,5 +1,6 @@
 class opendaylight::quagga (
 ){
+  $master_ip      = hiera('master_ip')
 
   firewall {'215 quagga':
     dport  => 179,
@@ -7,21 +8,22 @@ class opendaylight::quagga (
     action => 'accept',
   }
 
-  package { ['opnfv-quagga', 'libcapnp-0.5.99', 'python-pycapnp', 'python-thriftpy']:
-    ensure => installed,
-  }
-  service {'opnfv-quagga':
-    ensure => running
+  $service_file = '/etc/systemd/system/zrpcd.service'
+  file { $service_file:
+    ensure  => file,
+    content => template('opendaylight/zrpcd.service'),
   }
 
-  $config_path  = '/usr/lib/quagga/qthrift/bgpd.conf'
-  ini_setting { 'bgp_password':
-    ensure            => present,
-    setting           => 'password',
-    value             => 'sdncbgpc',
-    path              => $config_path,
-    key_val_separator => ' ',
-    require           => Package['opnfv-quagga'],
-    notify            => Service['opnfv-quagga']
+  if $::operatingsystem == 'Ubuntu' {
+    exec { 'install_quagga':
+      command => "curl http://${master_ip}:8080/plugins/opendaylight-1.0/deployment_scripts/install_quagga.sh | bash -s",
+      path    => '/usr/bin:/usr/sbin:/bin:/sbin',
+      timeout => 0,
+      require => File[$service_file],
+      before  => Service['zrpcd']
+    }
+    service {'zrpcd':
+      ensure => running
+    }
   }
 }
