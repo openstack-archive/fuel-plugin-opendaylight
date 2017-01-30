@@ -5,3 +5,4 @@
 .project
 .pydevproject
 tmp/
+deployment_scripts/install_quagga.sh

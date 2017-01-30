@@ -20,7 +20,7 @@
   parameters:
     puppet_manifest: puppet/manifests/odl-install.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
-    timeout: 720
+    timeout: 3000
 
 # We remove override file, because 'odl_hiera_override' task is not reenterant and
 # cannot correctly handled data on subsequent calls

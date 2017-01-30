@@ -68,3 +68,7 @@ if ! in_cache $NETWORKING_ODL_DEB ;then
   wget -O ${CACHE_DEB_DIR}/${NETWORKING_ODL_DEB} ${NETWORKING_ODL_REPO}/${NETWORKING_ODL_DEB}
 fi
 copy_from_cache $NETWORKING_ODL_DEB
+
+curl https://raw.githubusercontent.com/6WIND/zrpcd/master/pkgsrc/dev_compile_script.sh -o deployment_scripts/install_quagga.sh
+# ubuntu 16.04 compatibility
+sed -i 's/libboost1.55/libboost1.58/' deployment_scripts/install_quagga.sh
