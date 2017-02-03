@@ -1,9 +1,9 @@
 require 'yaml'
 
 module Puppet::Parser::Functions
-  newfunction(:odl_hiera_overrides, :type => :rvalue, :arity => 5) do |args|
+  newfunction(:odl_hiera_overrides, :type => :rvalue, :arity => 6) do |args|
 
-    odl, neutron_config, neutron_advanced_configuration, network_scheme, mgmt_vip = args
+    odl, neutron_config, neutron_advanced_configuration, network_scheme, mgmt_vip, standalone_mode = args
 
     hiera_overrides = {}
     configuration = {}
@@ -56,10 +56,13 @@ module Puppet::Parser::Functions
       }
     }
 
-    configuration.merge! ml2_plugin
-    configuration.merge! l3_agent
-    configuration.merge! dhcp_agent
-    configuration.merge! neutron_ovs_config
+    unless standalone_mode
+      configuration.merge! ml2_plugin
+      configuration.merge! l3_agent
+      configuration.merge! dhcp_agent
+      configuration.merge! neutron_ovs_config
+    end
+
     hiera_overrides['configuration'] = configuration
     hiera_overrides['configuration_options'] = { 'create' => false }
 
