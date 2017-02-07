@@ -6,7 +6,10 @@ class opendaylight::hiera_override {
   $orig_network_scheme = hiera_hash('network_scheme')
   $network_scheme = odl_network_scheme($opendaylight::odl_settings['enable_bgpvpn'], $orig_network_scheme)
   $ovsdb_managers = odl_ovsdb_managers($opendaylight::odl_mgmt_ips)
-  $standalone_mode = roles_include(['opendaylight']) and size(hiera('roles')) == 1
+
+  # exclude overridden configuration w/o neighbor roles
+  $neighbors = ['primary-controller', 'controller', 'compute']
+  $standalone_mode = roles_include(['opendaylight']) and !roles_include($neighbors)
 
   $odl_hiera_yaml = odl_hiera_overrides(
     $opendaylight::odl_settings,
