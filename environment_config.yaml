@@ -120,6 +120,7 @@ attributes:
         - odl-sfc-provider-rest
         - odl-sfc-ovs
         - odl-sfc-openflow-renderer
+        - odl-sfc-ui
     default_credentials:
       user: admin
       password: admin
