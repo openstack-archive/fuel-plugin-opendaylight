@@ -76,3 +76,5 @@ sed -i 's/libboost1.55/libboost1.58/' deployment_scripts/install_quagga.sh
 # These are the latest commits at the time this script was written.
 sed -i 's/cd zrpcd/cd zrpcd \&\& git checkout eddf5bd6305ef52a2d39df99860c734935dbc4af/' deployment_scripts/install_quagga.sh
 sed -i 's/quagga_110_mpbgp_capnp/95bb0f4a5/' deployment_scripts/install_quagga.sh
+# pin thrift to the latest version at this point in time
+sed -i 's/cd thrift/cd thrift \&\& git checkout 0.10.0/' deployment_scripts/install_quagga.sh
