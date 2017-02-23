@@ -78,3 +78,5 @@ sed -i 's/cd zrpcd/cd zrpcd \&\& git checkout eddf5bd6305ef52a2d39df99860c734935
 sed -i 's/quagga_110_mpbgp_capnp/95bb0f4a5/' deployment_scripts/install_quagga.sh
 # pin thrift to the latest version at this point in time
 sed -i 's/cd thrift/cd thrift \&\& git checkout 0.10.0/' deployment_scripts/install_quagga.sh
+# enable parallel build
+sed -i 's|make$|make -j|g' deployment_scripts/install_quagga.sh
