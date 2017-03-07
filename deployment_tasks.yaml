@@ -98,6 +98,8 @@
   groups: [primary-controller, controller, compute]
   required_for: [openstack-network-end]
   requires: [openstack-network-start]
+  cross-depends:
+    - name: odl_sfc
   condition:
     yaql_exp: >
       changedAny($.opendaylight, $.get('openstack_network'), $.debug,
