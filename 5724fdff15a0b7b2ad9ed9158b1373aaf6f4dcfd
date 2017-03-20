@@ -1,0 +1,9 @@
+Code-Review+2: Michal Skalski <mskalski@mirantis.com>
+Code-Review+1: Igor Zinovik <izinovik@mirantis.com>
+Workflow+1: Michael Polenchuk <mpolenchuk@mirantis.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Mon, 20 Mar 2017 08:54:33 +0000
+Reviewed-on: https://review.openstack.org/421907
+Project: openstack/fuel-plugin-opendaylight
+Branch: refs/heads/9.0
