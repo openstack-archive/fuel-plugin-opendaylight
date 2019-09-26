@@ -1,9 +1,0 @@
-*.rpm
-*.deb
-.build/
-.cache/
-.project
-.pydevproject
-doc/build
-tmp/
-deployment_scripts/install_quagga.sh
